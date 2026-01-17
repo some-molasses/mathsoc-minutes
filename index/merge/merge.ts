@@ -1,30 +1,23 @@
-import { lstatSync } from "fs";
-import { readdir, readFile, writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import path from "path";
+import { getMeetingDirectory, getMeetingsSubdirectories } from "../util";
 
 export async function mergeMeetings() {
-  //@todo refactor out subdirectory finding into shared function
-  const meetingsDirectory = path.join(process.cwd(), "output");
-  const meetingSubdirectories: string[] = await readdir(meetingsDirectory);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allMeetings: Record<string, any> = {};
 
-  for (const subdirectory of meetingSubdirectories) {
-    const subdirectoryPath = path.join(meetingsDirectory, subdirectory);
-    if (!lstatSync(subdirectoryPath).isDirectory()) {
-      continue;
-    }
+  const meetingsSubdirectories = await getMeetingsSubdirectories();
 
-    const parsedPath = path.join(subdirectoryPath, "parsed.json");
+  for (const subdirectory of meetingsSubdirectories) {
+    const parsedPath = path.join(subdirectory.path, "parsed.json");
 
-    allMeetings[subdirectory] = await readFile(parsedPath).then((res) =>
+    allMeetings[subdirectory.name] = await readFile(parsedPath).then((res) =>
       JSON.parse(res.toString()),
     );
   }
 
   await writeFile(
-    path.join(meetingsDirectory, "meetings.json"),
+    path.join(getMeetingDirectory(), "meetings.json"),
     JSON.stringify(allMeetings, null, 2),
   );
 }
