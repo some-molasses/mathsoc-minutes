@@ -1,7 +1,7 @@
 import { lstatSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
-import { ParsedMeeting } from "./parse/parse";
+import { Motion } from "./parse/parse";
 
 export function getMeetingsDirectory() {
   return path.join(process.cwd(), "output");
@@ -11,12 +11,16 @@ export function getMeetingsFilePath() {
   return path.join(getMeetingsDirectory(), "meetings.json");
 }
 
+export function getMotionsFilePath() {
+  return path.join(getMeetingsDirectory(), "motions.json");
+}
+
 export function getSearchIndexPath() {
   return path.join(getMeetingsDirectory(), "index.json");
 }
 
-export async function getMeetings(): Promise<Record<string, ParsedMeeting>> {
-  return await readFile(getMeetingsFilePath()).then((res) =>
+export async function getMotions(): Promise<Record<string, Motion>> {
+  return await readFile(getMotionsFilePath()).then((res) =>
     JSON.parse(res.toString()),
   );
 }

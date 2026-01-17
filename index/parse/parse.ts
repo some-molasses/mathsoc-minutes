@@ -14,7 +14,6 @@ export type ParsedMeeting = {
   date: string;
   motions: Motion[];
   url?: string;
-  raw: string;
 };
 
 export type ParsedMeetingDetail = ParsedMeeting & {

@@ -1,41 +1,28 @@
 import { readFile } from "fs/promises";
 import lunr from "lunr";
-import { ParsedMeeting } from "../index/parse/parse";
-import { getMeetingsFilePath, getSearchIndexPath } from "../index/util";
+import { Motion } from "../index/parse/parse";
+import { getMotions, getSearchIndexPath } from "../index/util";
 
-export async function retrieveMeetings(
-  query: string | null,
-): Promise<ParsedMeeting[]> {
-  const meetings = await readFile(getMeetingsFilePath()).then((res) =>
-    JSON.parse(res.toString()),
-  );
+export async function retrieveMotions(query: string | null): Promise<Motion[]> {
+  const motions = await getMotions();
 
   if (query) {
-    return await searchMeetings(query, meetings);
+    return await searchMotions(query, motions);
   }
 
-  return meetings;
+  return Object.values(motions);
 }
 
-async function searchMeetings(
+async function searchMotions(
   query: string,
-  meetings: Record<string, ParsedMeeting>,
-): Promise<ParsedMeeting[]> {
+  motions: Record<string, Motion>,
+): Promise<Motion[]> {
   const index = await loadIndex();
   const results = index.search(query);
-  const meetingResults = results.map((result) => {
-    const meetingIdMatch = result.ref.match(/(.*):/);
-    if (!meetingIdMatch) {
-      throw new Error(
-        `Could not extract meeting ID from motion ID ${result.ref}`,
-      );
-    }
 
-    const meetingId = meetingIdMatch[1];
-    return meetings[meetingId];
-  });
+  const motionResults = results.map((result) => motions[result.ref]);
 
-  return meetingResults;
+  return motionResults;
 }
 
 async function loadIndex(): Promise<lunr.Index> {
