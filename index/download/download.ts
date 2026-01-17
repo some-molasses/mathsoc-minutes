@@ -20,7 +20,7 @@ async function writeMeetings(category: MeetingCategory): Promise<void> {
   const meetingsOfCategory: MeetingData[] = Object.values(meetings[category]);
   await Promise.all(
     meetingsOfCategory.map((meetingData) =>
-      downloadDriveDocument(meetingData).then((meetingBody) =>
+      downloadDriveDocument(category, meetingData).then((meetingBody) =>
         writeMeeting(category, meetingData, meetingBody),
       ),
     ),
@@ -37,11 +37,11 @@ async function writeMeeting(
   }
 
   const date = new Date(data.date);
-  const title = `${getSourceName(source)}-${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`;
+  const title = `${getSourceName(source)}-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
   const directory = path.join(process.cwd(), "output", title);
   if (!existsSync(directory)) {
-    await mkdir(directory);
+    await mkdir(directory, { recursive: true });
   }
 
   await writeFile(path.join(directory, "agenda.md"), body);
@@ -62,15 +62,16 @@ function getSourceName(source: keyof typeof meetings) {
  * @todo download minutes, not just agenda
  */
 async function downloadDriveDocument(
+  category: MeetingCategory,
   meetingData: MeetingData,
 ): Promise<string | null> {
-  if (!meetingData.agenda) {
-    console.warn(`No agenda for ${meetingData.date}`);
+  // older documents had inconsistent formatting; hard to parse
+  if (new Date(meetingData.date).getFullYear() < 2022) {
     return null;
   }
 
-  // older documents had inconsistent formatting; hard to parse
-  if (new Date(meetingData.date).getFullYear() < 2020) {
+  if (!meetingData.agenda) {
+    console.warn(`No ${category} agenda for ${meetingData.date}`);
     return null;
   }
 
@@ -80,5 +81,14 @@ async function downloadDriveDocument(
     `https://docs.google.com/document/d/${docID}/export?format=markdown`,
   );
 
-  return await res.text();
+  const text = await res.text();
+  if (text.startsWith("<!DOCTYPE html>")) {
+    console.warn(
+      `Failed to download ${category} ${meetingData.date}; denied by Google`,
+    );
+  } else {
+    console.info(`Successfully downloaded ${category} ${meetingData.date}`);
+  }
+
+  return text;
 }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "index": "npx index/index.ts"
+    "index": "npx tsx index/index.ts"
   },
   "dependencies": {
     "next": "16.1.3",
