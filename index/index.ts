@@ -1,7 +1,7 @@
-import { downloadAllMeetings } from "./download/download";
+import { mergeMeetings } from "./merge/merge";
 
 (async () => {
-  console.info("hello?");
-  await downloadAllMeetings();
-  console.info("done");
+  // await downloadAllMeetings();
+  // await parseAllMeetings();
+  await mergeMeetings();
 })();

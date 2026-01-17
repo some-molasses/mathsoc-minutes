@@ -45,6 +45,7 @@ async function writeMeeting(
   }
 
   await writeFile(path.join(directory, "agenda.md"), body);
+  await writeFile(path.join(directory, "meta.json"), JSON.stringify(data));
 }
 
 function getSourceName(source: keyof typeof meetings) {
@@ -86,6 +87,8 @@ async function downloadDriveDocument(
     console.warn(
       `Failed to download ${category} ${meetingData.date}; denied by Google`,
     );
+
+    return null;
   } else {
     console.info(`Successfully downloaded ${category} ${meetingData.date}`);
   }
