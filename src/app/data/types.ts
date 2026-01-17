@@ -1,4 +1,9 @@
-export interface Meeting {
+export type MeetingCategory =
+  | "boardMeetings"
+  | "councilMeetings"
+  | "generalMeetings";
+
+export interface MeetingData {
   date: string;
   type?: string;
   agenda?: string;

@@ -1,40 +1,4 @@
-import { councilMeetings } from "@/app/data/council-meetings";
-
-export async function GET() {
-  const meetings = [];
-  for (let i = 0; i < 30; i++) {
-    meetings.push(await fetchMeeting(i));
-  }
-
-  return Response.json({ meetings });
-}
-
-async function fetchMeeting(index: number) {
-  const meeting = councilMeetings[index];
-  const url = meeting.agenda;
-
-  if (!url) {
-    return { date: meeting.date, motions: [] };
-  }
-
-  const minutes = await downloadDriveDocument(url);
-  return {
-    date: meeting.date,
-    ...(await parseMinutes(url, minutes)),
-  };
-}
-
-async function downloadDriveDocument(url: string): Promise<string> {
-  const docID = url.match("/d/(.*)/")![1];
-
-  const res = await fetch(
-    `https://docs.google.com/document/d/${docID}/export?format=markdown`,
-  );
-
-  return await res.text();
-}
-
-async function parseMinutes(url: string, document: string) {
+export async function parseMinutes(url: string, document: string) {
   const sanitized = document.replaceAll(/{.*}/g, "");
   const splitByHeading = sanitized.split("#");
 
