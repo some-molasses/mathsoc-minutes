@@ -5,6 +5,8 @@ import { getMeetingsSubdirectories } from "../util";
 
 export type Motion = {
   id: string;
+  meetingId: string;
+  date: string;
   title: string;
   body: string;
 };
@@ -68,7 +70,7 @@ function parseMinutes(
     return startsWithMotionNumber && startsWithSpace;
   });
 
-  const motions = motionBlobs.map((blob) => parseMotion(id, blob));
+  const motions = motionBlobs.map((blob) => parseMotion(id, data, blob));
 
   return {
     id: id,
@@ -79,7 +81,11 @@ function parseMinutes(
   };
 }
 
-function parseMotion(meetingId: string, motionText: string): Motion {
+function parseMotion(
+  meetingId: string,
+  meetingData: MeetingData,
+  motionText: string,
+): Motion {
   const trimmedMotionText = motionText.trim();
 
   const titleSplit = trimmedMotionText.indexOf("\n");
@@ -103,5 +109,11 @@ function parseMotion(meetingId: string, motionText: string): Motion {
   }
   const motionId = `${meetingId}:${motionNumberMatch[0]}`;
 
-  return { id: motionId, title: sanitizedTitle, body };
+  return {
+    id: motionId,
+    meetingId,
+    date: meetingData.date,
+    title: sanitizedTitle,
+    body,
+  };
 }

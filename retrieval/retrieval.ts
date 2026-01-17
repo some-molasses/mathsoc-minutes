@@ -3,14 +3,21 @@ import lunr from "lunr";
 import { Motion } from "../index/parse/parse";
 import { getMotions, getSearchIndexPath } from "../index/util";
 
-export async function retrieveMotions(query: string | null): Promise<Motion[]> {
+export type MotionFilters = {
+  from?: Date;
+  to?: Date;
+};
+
+export async function retrieveMotions(
+  query: string | null,
+  filters: MotionFilters,
+): Promise<Motion[]> {
   const motions = await getMotions();
+  const baseResults = query
+    ? await searchMotions(query, motions)
+    : Object.values(motions);
 
-  if (query) {
-    return await searchMotions(query, motions);
-  }
-
-  return Object.values(motions);
+  return filterResults(baseResults, filters);
 }
 
 async function searchMotions(
@@ -23,6 +30,24 @@ async function searchMotions(
   const motionResults = results.map((result) => motions[result.ref]);
 
   return motionResults;
+}
+
+function filterResults(results: Motion[], filters: MotionFilters) {
+  return results
+    .filter((result) => {
+      if (!filters.from) {
+        return true;
+      }
+
+      return filters.from <= new Date(result.date);
+    })
+    .filter((result) => {
+      if (!filters.to) {
+        return true;
+      }
+
+      return new Date(result.date) <= filters.to;
+    });
 }
 
 async function loadIndex(): Promise<lunr.Index> {
