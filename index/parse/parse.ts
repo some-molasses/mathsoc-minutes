@@ -4,13 +4,20 @@ import path from "path";
 import { getMeetingsSubdirectories } from "../util";
 
 export type Motion = {
+  id: string;
   title: string;
   body: string;
 };
 
 export type ParsedMeeting = {
+  id: string;
+  date: string;
   motions: Motion[];
   url?: string;
+  raw: string;
+};
+
+export type ParsedMeetingDetail = ParsedMeeting & {
   raw: string;
 };
 
@@ -22,17 +29,18 @@ export async function parseAllMeetings() {
       JSON.parse(res.toString()),
     );
     const agenda = await readFile(meeting.agenda).then((res) => res.toString());
-    const parsed = parseMinutes(meta, agenda);
+    const parsed = parseMinutes(meeting.id, meta, agenda);
     await writeFile(meeting.parsed, JSON.stringify(parsed, null, 2));
   }
 }
 
 async function getPaths(): Promise<
-  { agenda: string; meta: string; parsed: string }[]
+  { id: string; agenda: string; meta: string; parsed: string }[]
 > {
   const subdirectories = await getMeetingsSubdirectories();
-  return subdirectories.map(({ path: subdirectoryPath }) => {
+  return subdirectories.map(({ name, path: subdirectoryPath }) => {
     return {
+      id: name,
       agenda: path.join(subdirectoryPath, "agenda.md"),
       meta: path.join(subdirectoryPath, "meta.json"),
       parsed: path.join(subdirectoryPath, "parsed.json"),
@@ -40,7 +48,11 @@ async function getPaths(): Promise<
   });
 }
 
-function parseMinutes(data: MeetingData, document: string): ParsedMeeting {
+function parseMinutes(
+  id: string,
+  data: MeetingData,
+  document: string,
+): ParsedMeetingDetail {
   const sanitized = document.replaceAll(/{.*}/g, "");
   const splitByHeading = sanitized.split("#");
 
@@ -57,23 +69,40 @@ function parseMinutes(data: MeetingData, document: string): ParsedMeeting {
     return startsWithMotionNumber && startsWithSpace;
   });
 
-  const motions = motionBlobs.map((blob) => {
-    const titleSplit = blob.indexOf("\n");
-
-    const title = blob.substring(0, titleSplit);
-    const body = blob.substring(titleSplit);
-
-    const sanitizedTitle = title
-      .replaceAll(/[\-–—]\s.*/g, "") // remove movers, seconders
-      .replaceAll(/[_\\\*\-–—,]/g, "")
-      .trim();
-
-    return { title: sanitizedTitle, body };
-  });
+  const motions = motionBlobs.map((blob) => parseMotion(id, blob));
 
   return {
-    motions,
+    id: id,
+    date: data.date,
     url: data.agenda,
+    motions,
     raw: document,
   };
+}
+
+function parseMotion(meetingId: string, motionText: string): Motion {
+  const trimmedMotionText = motionText.trim();
+
+  const titleSplit = trimmedMotionText.indexOf("\n");
+
+  const title =
+    titleSplit > 0
+      ? trimmedMotionText.substring(0, titleSplit)
+      : trimmedMotionText;
+  const body = titleSplit > 0 ? trimmedMotionText.substring(titleSplit) : "";
+
+  const sanitizedTitle = title
+    .replaceAll(/[\-–—]\s.*/g, "") // remove movers, seconders
+    .replaceAll(/[_\\\*\-–—,]/g, "")
+    .trim();
+
+  const motionNumberMatch = title.match(/\d+\.\d+/);
+  if (!motionNumberMatch || !motionNumberMatch[0]) {
+    throw new Error(
+      `Could not find motion number for motion: ${title} (${trimmedMotionText}), found ${motionNumberMatch}`,
+    );
+  }
+  const motionId = `${meetingId}:${motionNumberMatch[0]}`;
+
+  return { id: motionId, title: sanitizedTitle, body };
 }

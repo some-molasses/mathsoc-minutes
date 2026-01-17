@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { ParsedMeeting } from "../parse/parse";
-import { getMeetingsDirectory, getMeetingsSubdirectories } from "../util";
+import { ParsedMeetingDetail } from "../parse/parse";
+import { getMeetingsFilePath, getMeetingsSubdirectories } from "../util";
 
 export async function mergeMeetings() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ export async function mergeMeetings() {
 
     const parsedMeeting = (await readFile(parsedPath).then((res) =>
       JSON.parse(res.toString()),
-    )) as ParsedMeeting;
+    )) as ParsedMeetingDetail;
 
     allMeetings[subdirectory.name] = {
       url: parsedMeeting.url,
@@ -22,8 +22,5 @@ export async function mergeMeetings() {
     };
   }
 
-  await writeFile(
-    path.join(getMeetingsDirectory(), "meetings.json"),
-    JSON.stringify(allMeetings, null, 2),
-  );
+  await writeFile(getMeetingsFilePath(), JSON.stringify(allMeetings, null, 2));
 }
