@@ -1,0 +1,17 @@
+main {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+
+  #contents {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    height: 100%;
+  }
+}
+
+#home-title {
+  margin-top: 48px;
+}

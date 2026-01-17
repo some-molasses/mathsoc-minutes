@@ -1,0 +1,33 @@
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-result {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-2);
+  gap: 8px;
+  padding: 16px;
+
+  .result-title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .result-title {
+      font-size: 1.25rem;
+    }
+
+    .result-date {
+      color: var(--text-light);
+    }
+  }
+
+  .result-id {
+    color: var(--text-light);
+    font-size: 0.6rem;
+    text-align: right;
+  }
+}

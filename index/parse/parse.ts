@@ -6,6 +6,7 @@ import { getMeetingsSubdirectories } from "../util";
 export type Motion = {
   id: string;
   meetingId: string;
+  motionNumber: string;
   date: string;
   title: string;
   body: string;
@@ -112,6 +113,7 @@ function parseMotion(
   return {
     id: motionId,
     meetingId,
+    motionNumber: motionNumberMatch[0],
     date: meetingData.date,
     title: sanitizedTitle,
     body,
