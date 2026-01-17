@@ -1,12 +1,27 @@
 import { councilMeetings } from "@/app/data/council-meetings";
 
 export async function GET() {
-  const url = councilMeetings[30].agenda!;
+  const meetings = [];
+  for (let i = 0; i < 30; i++) {
+    meetings.push(await fetchMeeting(i));
+  }
+
+  return Response.json({ meetings });
+}
+
+async function fetchMeeting(index: number) {
+  const meeting = councilMeetings[index];
+  const url = meeting.agenda;
+
+  if (!url) {
+    return { date: meeting.date, motions: [] };
+  }
 
   const minutes = await downloadDriveDocument(url);
-  const parsed = await parseMinutes(url, minutes);
-
-  return Response.json({ res: parsed });
+  return {
+    date: meeting.date,
+    ...(await parseMinutes(url, minutes)),
+  };
 }
 
 async function downloadDriveDocument(url: string): Promise<string> {
