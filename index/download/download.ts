@@ -3,6 +3,7 @@ import { MeetingCategory, MeetingData } from "@/app/data/types";
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { getMeetingsDirectory } from "../util";
 
 export async function downloadAllMeetings() {
   const meetingCategories: (keyof typeof meetings)[] = [
@@ -39,7 +40,7 @@ async function writeMeeting(
   const date = new Date(data.date);
   const title = `${getSourceName(source)}-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
-  const directory = path.join(process.cwd(), "output", title);
+  const directory = path.join(getMeetingsDirectory(), title);
   if (!existsSync(directory)) {
     await mkdir(directory, { recursive: true });
   }

@@ -2,12 +2,12 @@ import { lstatSync } from "fs";
 import { readdir } from "fs/promises";
 import path from "path";
 
-export function getMeetingDirectory() {
+export function getMeetingsDirectory() {
   return path.join(process.cwd(), "output");
 }
 
 export async function getMeetingsSubdirectories() {
-  const meetingsDirectory = getMeetingDirectory();
+  const meetingsDirectory = getMeetingsDirectory();
   const meetingSubdirectories = (await readdir(meetingsDirectory))
     .map((subdirectory) => ({
       name: subdirectory,

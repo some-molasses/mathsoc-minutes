@@ -3,6 +3,17 @@ import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { getMeetingsSubdirectories } from "../util";
 
+export type Motion = {
+  title: string;
+  body: string;
+};
+
+export type ParsedMeeting = {
+  motions: Motion[];
+  url?: string;
+  raw: string;
+};
+
 export async function parseAllMeetings() {
   const meetingPaths = await getPaths();
 
@@ -29,7 +40,7 @@ async function getPaths(): Promise<
   });
 }
 
-function parseMinutes(data: MeetingData, document: string) {
+function parseMinutes(data: MeetingData, document: string): ParsedMeeting {
   const sanitized = document.replaceAll(/{.*}/g, "");
   const splitByHeading = sanitized.split("#");
 
@@ -53,7 +64,7 @@ function parseMinutes(data: MeetingData, document: string) {
     const body = blob.substring(titleSplit);
 
     const sanitizedTitle = title
-      .replaceAll(/[\-–—].*/g, "")
+      .replaceAll(/[\-–—]\s.*/g, "") // remove movers, seconders
       .replaceAll(/[_\\\*\-–—,]/g, "")
       .trim();
 
