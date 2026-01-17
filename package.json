@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "index": "npx tsx index/index.ts",
-    "parse": "npx tsx index/parse.ts"
+    "index": "npx tsx index/commands/index.ts",
+    "parse": "npx tsx index/commands/parse.ts"
   },
   "dependencies": {
     "next": "16.1.3",

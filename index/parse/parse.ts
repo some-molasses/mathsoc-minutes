@@ -1,4 +1,5 @@
 import { MeetingData } from "@/app/data/types";
+import { lstatSync } from "fs";
 import { readdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 
@@ -10,7 +11,6 @@ export async function parseAllMeetings() {
       JSON.parse(res.toString()),
     );
     const agenda = await readFile(meeting.agenda).then((res) => res.toString());
-
     const parsed = parseMinutes(meta, agenda);
     await writeFile(meeting.parsed, JSON.stringify(parsed, null, 2));
   }
@@ -22,14 +22,19 @@ async function getPaths(): Promise<
   const meetingsDirectory = path.join(process.cwd(), "output");
   const meetingSubdirectories: string[] = await readdir(meetingsDirectory);
 
-  return meetingSubdirectories.map((subdirectory) => {
-    const subdirectoryPath = path.join(meetingsDirectory, subdirectory);
-    return {
-      agenda: path.join(subdirectoryPath, "agenda.md"),
-      meta: path.join(subdirectoryPath, "meta.json"),
-      parsed: path.join(subdirectoryPath, "parsed.json"),
-    };
-  });
+  return meetingSubdirectories
+    .filter((subdirectory) =>
+      lstatSync(path.join(meetingsDirectory, subdirectory)).isDirectory(),
+    ) // @todo clean this up in central function
+    .map((subdirectory) => {
+      const subdirectoryPath = path.join(meetingsDirectory, subdirectory);
+
+      return {
+        agenda: path.join(subdirectoryPath, "agenda.md"),
+        meta: path.join(subdirectoryPath, "meta.json"),
+        parsed: path.join(subdirectoryPath, "parsed.json"),
+      };
+    });
 }
 
 function parseMinutes(data: MeetingData, document: string) {
