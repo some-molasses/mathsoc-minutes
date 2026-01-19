@@ -18,13 +18,16 @@ export type ParsedMeetingDetail = ParsedMeeting & {
 export async function parseAllMeetings() {
   const meetingPaths = await getPaths();
 
-  for (const meeting of meetingPaths) {
-    const meta: MeetingData = await readFile(meeting.meta).then((res) =>
+  for (const meetingPath of meetingPaths) {
+    const meta: MeetingData = await readFile(meetingPath.meta).then((res) =>
       JSON.parse(res.toString()),
     );
-    const agenda = await readFile(meeting.agenda).then((res) => res.toString());
-    const parsed = parseMinutes(meeting.id, meta, agenda);
-    await writeFile(meeting.parsed, JSON.stringify(parsed, null, 2));
+    const agenda = await readFile(meetingPath.agenda).then((res) =>
+      res.toString(),
+    );
+    const parsed = parseMeeting(meetingPath.id, meta, agenda);
+
+    await writeFile(meetingPath.parsed, JSON.stringify(parsed, null, 2));
   }
 }
 
@@ -42,7 +45,7 @@ async function getPaths(): Promise<
   });
 }
 
-function parseMinutes(
+function parseMeeting(
   id: string,
   data: MeetingData,
   document: string,
