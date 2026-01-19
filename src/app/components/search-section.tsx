@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Motion, MotionFeature } from "../../../index/types/motion";
 import { Organization } from "../../../index/types/motion-features";
 import { colours } from "../colours";
+import { Markdown } from "./markdown";
 import "./search-section.scss";
 
 export const SearchSection: React.FC = () => {
@@ -48,7 +49,9 @@ const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
           <div className="result-date">{motion.date}</div>
         </div>
       </div>
-      <div className="result-body">{motion.body}</div>
+      <div className="result-body">
+        <Markdown contents={motion.body} />
+      </div>
       <div className="result-bottom-row">
         <div className="result-features">
           {motion.features.map((feature) => {

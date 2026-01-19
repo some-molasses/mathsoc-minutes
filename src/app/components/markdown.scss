@@ -1,0 +1,21 @@
+.markdown-section {
+  .inner-contents {
+    max-width: var(--content-width);
+    margin: auto;
+  }
+
+  line-height: 1.5;
+
+  ul,
+  ol {
+    padding-left: 20px;
+  }
+
+  li {
+    margin: 0.5em 0;
+  }
+
+  img {
+    max-width: 100%;
+  }
+}
