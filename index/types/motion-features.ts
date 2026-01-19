@@ -12,7 +12,7 @@ export type Organization =
   | "MathSoc Cartoons"; // also an affiliate
 
 export function generateTags(motion: Motion): MotionFeature[] {
-  return [{ type: "organization", value: [...tagOrganizations(motion)] }];
+  return [{ type: "organization", values: [...tagOrganizations(motion)] }];
 }
 
 function tagOrganizations(motion: Motion): Set<Organization> {

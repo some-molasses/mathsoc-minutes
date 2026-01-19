@@ -1,11 +1,12 @@
 import { readFile } from "fs/promises";
 import lunr from "lunr";
-import { Motion } from "../index/types/motion";
+import { Motion, MotionFeature } from "../index/types/motion";
 import { getMotions, getSearchIndexPath } from "../index/util";
 
 export type MotionFilters = {
   from?: Date;
   to?: Date;
+  requiredFeatures: MotionFeature[];
 };
 
 export async function retrieveMotions(
@@ -32,22 +33,23 @@ async function searchMotions(
   return motionResults;
 }
 
+type FilterFunction = (motion: Motion, filters: MotionFilters) => boolean;
 function filterResults(results: Motion[], filters: MotionFilters) {
-  return results
-    .filter((result) => {
-      if (!filters.from) {
-        return true;
-      }
+  const filterFunctions: FilterFunction[] = [
+    filters.requiredFeatures ? filterByFeatures : null,
+    filters.from ? filterByFromDate : null,
+    filters.to ? filterByToDate : null,
+  ].filter((fn) => fn) as FilterFunction[];
 
-      return filters.from <= new Date(result.date);
-    })
-    .filter((result) => {
-      if (!filters.to) {
-        return true;
+  return results.filter((result) => {
+    for (const filter of filterFunctions) {
+      if (!filter(result, filters)) {
+        return false;
       }
+    }
 
-      return new Date(result.date) <= filters.to;
-    });
+    return true;
+  });
 }
 
 async function loadIndex(): Promise<lunr.Index> {
@@ -56,4 +58,41 @@ async function loadIndex(): Promise<lunr.Index> {
   );
 
   return lunr.Index.load(serializedIndex);
+}
+
+function filterByFromDate(
+  motion: Motion,
+  filters: Required<Pick<MotionFilters, "from">>,
+): boolean {
+  return filters.from <= new Date(motion.date);
+}
+
+function filterByToDate(
+  motion: Motion,
+  filters: Required<Pick<MotionFilters, "to">>,
+): boolean {
+  return new Date(motion.date) <= filters.to;
+}
+
+function filterByFeatures(
+  motion: Motion,
+  filters: Required<Pick<MotionFilters, "requiredFeatures">>,
+) {
+  for (const requiredFeature of filters.requiredFeatures) {
+    const motionFeature = motion.features.find(
+      (feature) => feature.type == requiredFeature.type,
+    );
+
+    if (!motionFeature) {
+      return false;
+    }
+
+    for (const requiredFeatureValue in requiredFeature.values) {
+      if (!motionFeature.values.includes(requiredFeatureValue)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

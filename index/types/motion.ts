@@ -2,7 +2,7 @@ import { generateTags as generateFeatures } from "./motion-features";
 
 export interface MotionFeature {
   type: string;
-  value: string | string[];
+  values: string[];
 }
 
 export class Motion {
