@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Motion } from "../../../index/parse/parse";
+import { Motion } from "../../../index/types/motion";
 import "./search-section.scss";
 
 export const SearchSection: React.FC = () => {

@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
 import lunr from "lunr";
-import { Motion } from "../index/parse/parse";
+import { Motion } from "../index/types/motion";
 import { getMotions, getSearchIndexPath } from "../index/util";
 
 export type MotionFilters = {

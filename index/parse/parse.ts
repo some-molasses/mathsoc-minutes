@@ -1,16 +1,8 @@
 import { MeetingData } from "@/app/data/types";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
+import { Motion } from "../types/motion";
 import { getMeetingsSubdirectories } from "../util";
-
-export type Motion = {
-  id: string;
-  meetingId: string;
-  motionNumber: string;
-  date: string;
-  title: string;
-  body: string;
-};
 
 export type ParsedMeeting = {
   id: string;
@@ -110,12 +102,12 @@ function parseMotion(
   }
   const motionId = `${meetingId}:${motionNumberMatch[0]}`;
 
-  return {
+  return new Motion({
     id: motionId,
     meetingId,
     motionNumber: motionNumberMatch[0],
     date: meetingData.date,
     title: sanitizedTitle,
     body,
-  };
+  });
 }

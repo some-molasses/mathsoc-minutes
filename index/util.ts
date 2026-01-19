@@ -1,7 +1,7 @@
 import { lstatSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
-import { Motion } from "./parse/parse";
+import { Motion } from "./types/motion";
 
 export function getMeetingsDirectory() {
   return path.join(process.cwd(), "output");
