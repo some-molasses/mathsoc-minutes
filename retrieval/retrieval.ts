@@ -18,7 +18,10 @@ export async function retrieveMotions(
     ? await searchMotions(query, motions)
     : Object.values(motions);
 
-  return filterResults(baseResults, filters);
+  // @todo make sorting better; provide options
+  return filterResults(baseResults, filters).sort((a, b) =>
+    new Date(a.date) < new Date(b.date) ? 1 : -1,
+  );
 }
 
 async function searchMotions(
