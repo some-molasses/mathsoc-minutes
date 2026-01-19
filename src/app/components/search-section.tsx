@@ -25,12 +25,11 @@ export const SearchSection: React.FC = () => {
 
   return (
     <div className="search-container">
-      <div className="search-input">
-        <input
-          placeholder="search through all MathSoc motions"
-          onChange={(evt) => setQuery(evt.target.value)}
-        />
-      </div>
+      <input
+        className="search-input"
+        placeholder="search through all MathSoc motions"
+        onChange={(evt) => setQuery(evt.target.value)}
+      />
       <div className="search-results">
         {results.map((motion) => (
           <SearchResult key={motion.id} motion={motion} />
