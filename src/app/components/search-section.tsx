@@ -6,10 +6,11 @@ import { Organization } from "../../../index/types/motion-features";
 import { colours } from "../colours";
 import { Markdown } from "./markdown";
 import "./search-section.scss";
+import { PaginatedMotionsResponse } from "../api/motions/route";
 
 export const SearchSection: React.FC = () => {
   const [query, setQuery] = useState<string>("");
-  const [results, setResults] = useState<Motion[]>([]);
+  const [results, setResults] = useState<PaginatedMotionsResponse>();
 
   // @todo figure out useQuery again :(
   useEffect(() => {
@@ -31,7 +32,7 @@ export const SearchSection: React.FC = () => {
         onChange={(evt) => setQuery(evt.target.value)}
       />
       <div className="search-results">
-        {results.map((motion) => (
+        {results?.data.motions.map((motion) => (
           <SearchResult key={motion.id} motion={motion} />
         ))}
       </div>

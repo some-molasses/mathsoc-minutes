@@ -1,4 +1,4 @@
-import { lstatSync } from "fs";
+import { existsSync, lstatSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import { Motion } from "./types/motion";
@@ -20,6 +20,12 @@ export function getSearchIndexPath() {
 }
 
 export async function getMotions(): Promise<Record<string, Motion>> {
+  if (!existsSync(getMotionsFilePath())) {
+    throw new Error(
+      `Output directory ${getMotionsFilePath()} does not exist; try generating the index first`,
+    );
+  }
+
   return await readFile(getMotionsFilePath()).then((res) =>
     JSON.parse(res.toString()),
   );
