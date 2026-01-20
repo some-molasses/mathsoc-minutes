@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Motion, MotionFeature } from "../../../index/types/motion";
 import { Organization } from "../../../index/types/motion-features";
+import { PaginatedMotionsResponse } from "../api/motions/route";
 import { colours } from "../colours";
 import { Markdown } from "./markdown";
 import "./search-section.scss";
-import { PaginatedMotionsResponse } from "../api/motions/route";
 
 export const SearchSection: React.FC = () => {
   const [query, setQuery] = useState<string>("");
@@ -46,7 +46,13 @@ const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
       <div className="result-title-section">
         <h2 className="result-title">{motion.title}</h2>
         <div className="result-metadata">
-          <div className="result-date">{motion.date}</div>
+          <div className="result-date">
+            {new Date(motion.date).toLocaleDateString("en-CA", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </div>
         </div>
       </div>
       <div className="result-body">

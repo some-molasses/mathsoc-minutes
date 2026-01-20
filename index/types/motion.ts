@@ -1,6 +1,6 @@
 import { generateTags as generateFeatures } from "./motion-features";
 
-export type FeatureType = "organization";
+export type FeatureType = "organization" | "body";
 
 export interface MotionFeature {
   type: FeatureType;

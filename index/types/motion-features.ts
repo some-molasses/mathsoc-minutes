@@ -11,8 +11,25 @@ export type Organization =
   | "mathNEWS"
   | "MathSoc Cartoons"; // also an affiliate
 
+export type MeetingBody = "Council" | "Board" | "General meeting";
+
 export function generateTags(motion: Motion): MotionFeature[] {
-  return [{ type: "organization", values: [...tagOrganizations(motion)] }];
+  return [
+    { type: "organization", values: [...tagOrganizations(motion)] },
+    { type: "body", values: [tagBody(motion)] },
+  ];
+}
+
+function tagBody(motion: Motion): MeetingBody {
+  if (motion.meetingId.includes("board")) {
+    return "Board";
+  }
+
+  if (motion.meetingId.includes("council")) {
+    return "Council";
+  }
+
+  return "General meeting";
 }
 
 function tagOrganizations(motion: Motion): Set<Organization> {
