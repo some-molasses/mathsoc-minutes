@@ -13,14 +13,17 @@ export type Organization =
 
 export type MeetingBody = "Council" | "Board" | "General meeting";
 
+export type MonetaryRelation = "Monetary" | "Non-monetary";
+
 export function generateTags(motion: Motion): MotionFeature[] {
   return [
     { type: "organization", values: [...tagOrganizations(motion)] },
-    { type: "body", values: [tagBody(motion)] },
+    { type: "body", values: [tagMeetingBody(motion)] },
+    { type: "isMonetary", values: [tagIsMonetary(motion)] },
   ];
 }
 
-function tagBody(motion: Motion): MeetingBody {
+function tagMeetingBody(motion: Motion): MeetingBody {
   if (motion.meetingId.includes("board")) {
     return "Board";
   }
@@ -30,6 +33,10 @@ function tagBody(motion: Motion): MeetingBody {
   }
 
   return "General meeting";
+}
+
+function tagIsMonetary(motion: Motion): MonetaryRelation {
+  return motion.textContents.includes("$") ? "Monetary" : "Non-monetary";
 }
 
 function tagOrganizations(motion: Motion): Set<Organization> {
