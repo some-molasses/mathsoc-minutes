@@ -11,6 +11,7 @@
     "parse": "npx tsx index/commands/parse.ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.19",
     "@types/lunr": "^2.3.7",
     "lunr": "^2.3.9",
     "next": "16.1.3",

@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PaginatedMotionsResponse } from "../../api/motions/route";
+import { PaginatedMotionsResponse } from "@/app/api/motions/route";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { SearchResult } from "./search-result";
 import "./search-section.scss";
 
 export const SearchSection: React.FC = () => {
   const [query, setQuery] = useState<string>("");
-  const [results, setResults] = useState<PaginatedMotionsResponse>();
 
-  // @todo figure out useQuery again :(
-  useEffect(() => {
-    const motionsURL = new URL("/api/motions", window.location.origin);
-    if (query) {
-      motionsURL.searchParams.append("query", query);
-    }
+  const { data: results } = useQuery<PaginatedMotionsResponse>({
+    queryKey: ["/api/motions"],
+    queryFn: async () => {
+      const motionsURL = new URL("/api/motions", window.location.origin);
+      if (query) {
+        motionsURL.searchParams.append("query", query);
+      }
 
-    fetch(motionsURL)
-      .then((res) => res.json())
-      .then((res) => setResults(res));
-  }, [query]);
+      return fetch(motionsURL).then((res) => res.json());
+    },
+  });
 
   return (
     <div className="search-container">
