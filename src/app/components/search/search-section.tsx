@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Motion, MotionFeature } from "../../../index/types/motion";
-import { Organization } from "../../../index/types/motion-features";
-import { PaginatedMotionsResponse } from "../api/motions/route";
-import { colours } from "../colours";
-import { Markdown } from "./markdown";
+import { Motion, MotionFeature } from "../../../../index/types/motion";
+import { Organization } from "../../../../index/types/motion-features";
+import { PaginatedMotionsResponse } from "../../api/motions/route";
+import { colours } from "../../colours";
+import { Markdown } from "../markdown";
 import "./search-section.scss";
 
 export const SearchSection: React.FC = () => {
