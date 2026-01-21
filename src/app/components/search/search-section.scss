@@ -18,3 +18,13 @@
   flex-direction: column;
   gap: 16px;
 }
+
+.search-top-bar {
+  flex-direction: row-reverse;
+
+  .sort-button {
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+  }
+}
