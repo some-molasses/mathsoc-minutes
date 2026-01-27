@@ -2,7 +2,7 @@ import { writeFile } from "fs/promises";
 import lunr from "lunr";
 import { getMotions, getSearchIndexPath } from "../util";
 
-export async function buildIndex() {
+export async function writeIndex() {
   const motions = await getMotions();
   const motionsList = Object.values(motions);
 

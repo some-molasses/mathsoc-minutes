@@ -19,6 +19,10 @@ export function getSearchIndexPath() {
   return path.join(getMeetingsDirectory(), "index.json");
 }
 
+export function getFeaturesListPath() {
+  return path.join(getMeetingsDirectory(), "features.json");
+}
+
 export async function getMotions(): Promise<Record<string, Motion>> {
   if (!existsSync(getMotionsFilePath())) {
     throw new Error(

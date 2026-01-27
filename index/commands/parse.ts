@@ -1,9 +1,5 @@
-import { mergeMeetings } from "../merge/merge";
-import { parseAllMeetings } from "../parse/parse";
-import { buildIndex } from "../search-index/search-index";
+import { parseMeetings } from "../parse";
 
 (async () => {
-  await parseAllMeetings();
-  await mergeMeetings();
-  await buildIndex();
+  await parseMeetings();
 })();
