@@ -1,9 +1,10 @@
 "use client";
 
+import { FeaturesListResponse } from "@/app/api/features/route";
 import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Centered, Row } from "./layout";
+import { Centered, Column, Row } from "./layout";
 import { SearchResult } from "./search-result";
 import "./search-section.scss";
 
@@ -73,18 +74,23 @@ export const SearchSection: React.FC = () => {
         onNextPage={onNextPage}
         onPreviousPage={onPreviousPage}
       />
-      <div className="search-results">
-        {results?.data.motions.map((motion) => (
-          <SearchResult key={motion.id} motion={motion} />
-        ))}
-      </div>
-      <Centered>
-        <Pagination
-          data={results}
-          onNext={onNextPage}
-          onPrevious={onPreviousPage}
-        />
-      </Centered>
+      <Row>
+        <Filters onFiltersChange={() => {}} />
+        <Column>
+          <div className="search-results">
+            {results?.data.motions.map((motion) => (
+              <SearchResult key={motion.id} motion={motion} />
+            ))}
+          </div>
+          <Centered>
+            <Pagination
+              data={results}
+              onNext={onNextPage}
+              onPrevious={onPreviousPage}
+            />
+          </Centered>
+        </Column>
+      </Row>
     </div>
   );
 };
@@ -143,5 +149,56 @@ const Pagination: React.FC<{
         next page
       </button>
     </Row>
+  );
+};
+
+const Filters: React.FC<{ onFiltersChange: () => void }> = (
+  {
+    // onFiltersChange,
+  },
+) => {
+  const { data: features } = useQuery<FeaturesListResponse>({
+    queryKey: ["/api/features"],
+    queryFn: async () => {
+      return fetch("/api/features").then((res) => res.json());
+    },
+  });
+
+  return (
+    <Column className="filters-menu">
+      {features
+        ? Object.entries(features).map(([featureName, featureMetadata]) => {
+            return (
+              <FeatureSection
+                key={featureName}
+                label={featureMetadata.label}
+                featureName={featureName}
+                featureValues={featureMetadata.values}
+              />
+            );
+          })
+        : null}
+    </Column>
+  );
+};
+
+const FeatureSection: React.FC<{
+  label: string;
+  featureName: string;
+  featureValues: string[];
+}> = ({ label, featureName, featureValues }) => {
+  return (
+    <Column key={featureName} className="feature-section">
+      <h3 className="feature-name">{label}</h3>
+      <Column className="feature-options">
+        {featureValues.map((featureValue) => {
+          return (
+            <Row key={featureValue} className="feature-value-row">
+              <button className="feature-value">{featureValue}</button>
+            </Row>
+          );
+        })}
+      </Column>
+    </Column>
   );
 };

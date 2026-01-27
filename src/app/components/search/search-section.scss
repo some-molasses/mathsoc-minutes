@@ -61,3 +61,39 @@
     font-size: 0.8rem;
   }
 }
+
+.filters-menu {
+  width: 200px;
+  text-align: left;
+  gap: 1px;
+  margin-right: 16px;
+  background-color: var(--background-2);
+  height: min-content;
+
+  .feature-section {
+    background-color: var(--background);
+    align-items: flex-start;
+    padding: 8px;
+  }
+
+  .feature-name {
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+
+  .feature-options {
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .feature-value-row {
+    gap: 4px;
+  }
+
+  .feature-value {
+    background-color: var(--background-1);
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+}

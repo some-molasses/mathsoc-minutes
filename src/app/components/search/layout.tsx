@@ -1,7 +1,7 @@
 import "./layout.scss";
 
 type LayoutProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   id?: string;
 };

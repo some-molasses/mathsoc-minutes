@@ -47,3 +47,18 @@ a {
     color-scheme: dark;
   }
 }
+
+button {
+  background-color: var(--background-2);
+  border: none;
+  outline: none;
+  padding: 4px;
+
+  &:enabled {
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    outline: auto;
+  }
+}
