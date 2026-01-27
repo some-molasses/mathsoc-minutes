@@ -71,14 +71,15 @@ function sortMotions(
   motions: Motion[],
 ): Motion[] {
   switch (request.sort) {
-    case "most-relevant": {
-      return motions;
-    }
     case "newest": {
       return motions.sort((a, b) => (a.date < b.date ? -1 : 1));
     }
     case "oldest": {
       return motions.sort((a, b) => (a.date > b.date ? -1 : 1));
+    }
+    default:
+    case "most-relevant": {
+      return motions;
     }
   }
 }

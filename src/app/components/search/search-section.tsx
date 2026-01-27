@@ -62,7 +62,7 @@ export const SearchSection: React.FC = () => {
         placeholder="search through all MathSoc motions"
         onKeyDown={(evt) =>
           evt.key === "Enter"
-            ? setParams({ query: evt.currentTarget.value })
+            ? setParams({ query: evt.currentTarget.value, page: "0" })
             : null
         }
         defaultValue={query ?? ""}
@@ -128,16 +128,20 @@ const Pagination: React.FC<{
       <span className="pagination-label">
         page {data.page.index + 1} of {data.page.count}
       </span>
-      {data.page.index > 0 ? (
-        <button className="pagination-button" onClick={onPrevious}>
-          previous page
-        </button>
-      ) : null}
-      {data.page.index < data.page.count - 1 ? (
-        <button className="pagination-button" onClick={onNext}>
-          next page
-        </button>
-      ) : null}
+      <button
+        className="pagination-button"
+        onClick={onPrevious}
+        disabled={data.page.index == 0}
+      >
+        previous page
+      </button>
+      <button
+        className="pagination-button"
+        onClick={onNext}
+        disabled={data.page.index >= data.page.count - 1}
+      >
+        next page
+      </button>
     </Row>
   );
 };

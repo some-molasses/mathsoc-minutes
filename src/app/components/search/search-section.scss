@@ -48,10 +48,12 @@
 
   .pagination-button {
     padding: 4px;
-    // height: 24px;
     background-color: var(--background-2);
     border: none;
-    cursor: pointer;
+
+    &:enabled {
+      cursor: pointer;
+    }
   }
 
   .pagination-label {
