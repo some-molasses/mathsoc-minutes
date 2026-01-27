@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { Motion } from "../../../../index/types/motion";
-import { retrieveMotions } from "../../../../retrieval/retrieval";
+import { retrieveMotions } from "../../../../retrieval/motions/motion-retrieval";
 
 export type SortOption = "newest" | "oldest" | "most-relevant";
 
