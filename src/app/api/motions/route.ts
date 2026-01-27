@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server";
-import { retrieveMotions } from "../../../../retrieval/retrieval";
 import { Motion } from "../../../../index/types/motion";
+import { retrieveMotions } from "../../../../retrieval/retrieval";
+
+export type SortOption = "newest" | "oldest" | "most-relevant";
 
 export interface PaginatedMotionsRequest {
   query: string | null;
+  sort: SortOption;
   filters: {
     from?: Date;
     to?: Date;
@@ -34,7 +37,8 @@ export async function GET(rawRequest: NextRequest) {
     requiredFeatures: [],
   });
 
-  const paginatedResult = paginateMotions(motionRequest, result);
+  const sortedResult = sortMotions(motionRequest, result);
+  const paginatedResult = paginateMotions(motionRequest, sortedResult);
 
   return new Response(JSON.stringify(paginatedResult), {
     status: 200,
@@ -58,7 +62,25 @@ function extractRequest(request: NextRequest): PaginatedMotionsRequest {
       index: parseInt(searchParams.get("pageIndex") ?? "0"),
       size: parseInt(searchParams.get("pageSize") ?? "20"),
     },
+    sort: (searchParams.get("sort") as SortOption) || "most relevant",
   };
+}
+
+function sortMotions(
+  request: PaginatedMotionsRequest,
+  motions: Motion[],
+): Motion[] {
+  switch (request.sort) {
+    case "most-relevant": {
+      return motions;
+    }
+    case "newest": {
+      return motions.sort((a, b) => (a.date < b.date ? -1 : 1));
+    }
+    case "oldest": {
+      return motions.sort((a, b) => (a.date > b.date ? -1 : 1));
+    }
+  }
 }
 
 function paginateMotions(
