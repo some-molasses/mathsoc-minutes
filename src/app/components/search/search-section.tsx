@@ -3,13 +3,14 @@
 import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Row } from "./layout";
+import { Centered, Row } from "./layout";
 import { SearchResult } from "./search-result";
 import "./search-section.scss";
 
 export type SearchQueryParams = Partial<{
   query: string;
   sort: SortOption;
+  page: string;
 }>;
 
 export const SearchSection: React.FC = () => {
@@ -19,6 +20,7 @@ export const SearchSection: React.FC = () => {
 
   const query = searchParams.get("query");
   const sort = searchParams.get("sort");
+  const pageIndex = searchParams.get("page") ?? "0";
 
   const setParams = (toSet: SearchQueryParams) => {
     const newParams = new URLSearchParams(searchParams);
@@ -29,7 +31,7 @@ export const SearchSection: React.FC = () => {
   };
 
   const { data: results } = useQuery<PaginatedMotionsResponse>({
-    queryKey: ["/api/motions", query],
+    queryKey: ["/api/motions", query, sort, pageIndex],
     queryFn: async () => {
       const motionsURL = new URL("/api/motions", window.location.origin);
       if (query) {
@@ -38,9 +40,20 @@ export const SearchSection: React.FC = () => {
       if (sort) {
         motionsURL.searchParams.append("sort", sort);
       }
+      motionsURL.searchParams.append("pageIndex", pageIndex);
       return fetch(motionsURL).then((res) => res.json());
     },
   });
+
+  const onNextPage = () =>
+    setParams({
+      page: (parseInt(pageIndex) + 1).toString(),
+    });
+
+  const onPreviousPage = () =>
+    setParams({
+      page: (parseInt(pageIndex) - 1).toString(),
+    });
 
   return (
     <div className="search-container">
@@ -52,22 +65,39 @@ export const SearchSection: React.FC = () => {
             ? setParams({ query: evt.currentTarget.value })
             : null
         }
+        defaultValue={query ?? ""}
       />
-      <TopBar onSelect={(sort) => setParams({ sort })} />
+      <TopBar
+        onSelect={(sort) => setParams({ sort })}
+        data={results}
+        onNextPage={onNextPage}
+        onPreviousPage={onPreviousPage}
+      />
       <div className="search-results">
         {results?.data.motions.map((motion) => (
           <SearchResult key={motion.id} motion={motion} />
         ))}
       </div>
+      <Centered>
+        <Pagination
+          data={results}
+          onNext={onNextPage}
+          onPrevious={onPreviousPage}
+        />
+      </Centered>
     </div>
   );
 };
 
-const TopBar: React.FC<{ onSelect: (value: SortOption) => void }> = ({
-  onSelect,
-}) => {
+const TopBar: React.FC<{
+  onSelect: (value: SortOption) => void;
+  onNextPage: () => void;
+  onPreviousPage: () => void;
+  data?: PaginatedMotionsResponse;
+}> = ({ onSelect, onNextPage, onPreviousPage, data }) => {
   return (
     <Row className="search-top-bar">
+      <Pagination data={data} onNext={onNextPage} onPrevious={onPreviousPage} />
       <Row className="sort-button">
         <select
           name="sort"
@@ -80,6 +110,34 @@ const TopBar: React.FC<{ onSelect: (value: SortOption) => void }> = ({
           <option value="newest">newest first</option>
         </select>
       </Row>
+    </Row>
+  );
+};
+
+const Pagination: React.FC<{
+  data?: PaginatedMotionsResponse;
+  onNext: () => void;
+  onPrevious: () => void;
+}> = ({ data, onNext, onPrevious }) => {
+  if (!data?.page) {
+    return <div></div>;
+  }
+
+  return (
+    <Row className="pagination-row">
+      <span className="pagination-label">
+        page {data.page.index + 1} of {data.page.count}
+      </span>
+      {data.page.index > 0 ? (
+        <button className="pagination-button" onClick={onPrevious}>
+          previous page
+        </button>
+      ) : null}
+      {data.page.index < data.page.count - 1 ? (
+        <button className="pagination-button" onClick={onNext}>
+          next page
+        </button>
+      ) : null}
     </Row>
   );
 };
