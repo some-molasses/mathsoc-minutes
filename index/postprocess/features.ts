@@ -19,7 +19,7 @@ export async function writeFeatureList() {
   const featuresJSON = features
     .entries()
     .reduce((prev, [featureName, valueSet]) => {
-      return { ...prev, [featureName]: Array.from(valueSet) };
+      return { ...prev, [featureName]: Array.from(valueSet).sort() };
     }, {});
 
   await writeFile(getFeaturesListPath(), JSON.stringify(featuresJSON));
