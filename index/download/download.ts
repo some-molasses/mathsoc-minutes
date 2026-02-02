@@ -38,7 +38,7 @@ async function writeMeeting(
   }
 
   const date = new Date(data.date);
-  const title = `${getSourceName(source)}-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const title = `${getSourceName(source)}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
   const directory = path.join(getMeetingsDirectory(), title);
   if (!existsSync(directory)) {
