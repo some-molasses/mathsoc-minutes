@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import { ParsedMeeting, ParsedMeetingDetail } from "../parse/parse";
+import { Meeting, ParsedMeetingDetail } from "../parse/parse";
 import { Motion } from "../types/motion";
 import {
   getMeetingsFilePath,
@@ -9,7 +9,7 @@ import {
 } from "../util";
 
 export async function mergeMeetings() {
-  const allMeetings: Record<string, ParsedMeeting> = {};
+  const allMeetings: Record<string, Meeting> = {};
   const allMotions: Record<string, Motion> = {};
 
   const meetingsSubdirectories = await getMeetingsSubdirectories();

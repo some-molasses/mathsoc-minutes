@@ -4,14 +4,14 @@ import path from "path";
 import { Motion } from "../types/motion";
 import { getMeetingsSubdirectories } from "../util";
 
-export type ParsedMeeting = {
+export type Meeting = {
   id: string;
   date: string;
   motions: Motion[];
   url?: string;
 };
 
-export type ParsedMeetingDetail = ParsedMeeting & {
+export type ParsedMeetingDetail = Meeting & {
   raw: string;
 };
 
