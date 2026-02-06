@@ -1,18 +1,22 @@
 :root {
   --background: #ffffff;
   --background-2: #f8f8f8;
+  --text: #222;
   --text-light: #888;
 
   --mathsoc-pink: #c60078;
   --mathsoc-pink-2: #df2498;
   --mathsoc-pink-3: #ff63aa;
   --mathsoc-pink-4: #ffbeef;
+
+  --transition: 0.1s linear;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #111;
     --background-2: #181818;
+    --text: #fff;
     --text-light: #888;
   }
 }

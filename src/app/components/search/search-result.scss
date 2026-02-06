@@ -37,8 +37,16 @@
       align-items: center;
 
       background-color: var(--background);
+      border-bottom: 2px solid var(--background);
       padding: 4px;
       font-size: 0.8rem;
+
+      cursor: pointer;
+      transition: var(--transition);
+
+      &.filter-active {
+        border-color: var(--mathsoc-pink);
+      }
 
       .feature-dot {
         margin: 4px;

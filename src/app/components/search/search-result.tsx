@@ -1,10 +1,18 @@
 import { colours } from "@/app/colours";
-import { Motion, MotionFeature } from "../../../../index/types/motion";
+import { FeatureType, Motion } from "../../../../index/types/motion";
 import { Organization } from "../../../../index/types/motion-features";
 import { Markdown } from "../markdown";
 import "./search-result.scss";
+import { useSearchFilters } from "./search-filters";
 
 export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
+  const { filters, isFeatureFiltered } = useSearchFilters();
+  console.log(
+    motion.features,
+    filters,
+    isFeatureFiltered("organization", "CSC"),
+  );
+
   return (
     <div className="search-result">
       <div className="result-title-section">
@@ -32,7 +40,7 @@ export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
 
             return feature.values.map((featureValue) => (
               <SearchResultFeature
-                feature={feature}
+                featureType={feature.type}
                 value={featureValue}
                 key={feature.type + featureValue}
               />
@@ -46,11 +54,13 @@ export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
 };
 
 const SearchResultFeature: React.FC<{
-  feature: MotionFeature;
+  featureType: FeatureType;
   value: string;
-}> = ({ feature, value }) => {
+}> = ({ featureType, value }) => {
+  const { toggleFilter, isFeatureFiltered } = useSearchFilters();
+
   const getDotColor = () => {
-    switch (feature.type) {
+    switch (featureType) {
       case "organization": {
         switch (value as Organization) {
           case "ActSci Club":
@@ -76,9 +86,24 @@ const SearchResultFeature: React.FC<{
     }
   };
 
+  const getClassName = () => {
+    let className = `result-feature`;
+    if (isFeatureFiltered(featureType, value)) {
+      className += " filter-active";
+    }
+
+    return className;
+  };
+
   return (
-    <div className="result-feature">
-      <div className="feature-dot" style={{ backgroundColor: getDotColor() }} />
+    <div
+      className={getClassName()}
+      onClick={() => toggleFilter(featureType, value)}
+    >
+      <div
+        className={"feature-dot"}
+        style={{ backgroundColor: getDotColor() }}
+      />
       <span className="feature-name">{value}</span>
     </div>
   );
