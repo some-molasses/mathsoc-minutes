@@ -21,7 +21,17 @@ export type SearchQueryParams = Partial<{
   page: string;
 }>;
 
-export const SearchSection: React.FC = () => {
+export const SearchSection = () => {
+  const [filters, setFilters] = useState<MotionFeatureFilter[]>([]);
+
+  return (
+    <SearchFiltersContext.Provider value={{ filters, setFilters }}>
+      <SearchSectionGuts />
+    </SearchFiltersContext.Provider>
+  );
+};
+
+const SearchSectionGuts: React.FC = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -29,8 +39,6 @@ export const SearchSection: React.FC = () => {
   const query = searchParams.get("query");
   const sort = searchParams.get("sort");
   const pageIndex = searchParams.get("page") ?? "0";
-
-  const [filters, setFilters] = useState<MotionFeatureFilter[]>([]);
 
   const setParams = (toSet: SearchQueryParams) => {
     const newParams = new URLSearchParams(searchParams);
@@ -66,43 +74,41 @@ export const SearchSection: React.FC = () => {
     });
 
   return (
-    <SearchFiltersContext.Provider value={{ filters, setFilters }}>
-      <div className="search-container">
-        <input
-          className="search-input"
-          placeholder="search through all MathSoc motions"
-          onKeyDown={(evt) =>
-            evt.key === "Enter"
-              ? setParams({ query: evt.currentTarget.value, page: "0" })
-              : null
-          }
-          defaultValue={query ?? ""}
-        />
-        <TopBar
-          onSelect={(sort) => setParams({ sort })}
-          data={results}
-          onNextPage={onNextPage}
-          onPreviousPage={onPreviousPage}
-        />
-        <Row>
-          <Filters />
-          <Column>
-            <div className="search-results">
-              {results?.data.motions.map((motion) => (
-                <SearchResult key={motion.id} motion={motion} />
-              ))}
-            </div>
-            <Centered>
-              <Pagination
-                data={results}
-                onNext={onNextPage}
-                onPrevious={onPreviousPage}
-              />
-            </Centered>
-          </Column>
-        </Row>
-      </div>
-    </SearchFiltersContext.Provider>
+    <div className="search-container">
+      <input
+        className="search-input"
+        placeholder="search through all MathSoc motions"
+        onKeyDown={(evt) =>
+          evt.key === "Enter"
+            ? setParams({ query: evt.currentTarget.value, page: "0" })
+            : null
+        }
+        defaultValue={query ?? ""}
+      />
+      <TopBar
+        onSelect={(sort) => setParams({ sort })}
+        data={results}
+        onNextPage={onNextPage}
+        onPreviousPage={onPreviousPage}
+      />
+      <Row>
+        <Filters />
+        <Column>
+          <div className="search-results">
+            {results?.data.motions.map((motion) => (
+              <SearchResult key={motion.id} motion={motion} />
+            ))}
+          </div>
+          <Centered>
+            <Pagination
+              data={results}
+              onNext={onNextPage}
+              onPrevious={onPreviousPage}
+            />
+          </Centered>
+        </Column>
+      </Row>
+    </div>
   );
 };
 
