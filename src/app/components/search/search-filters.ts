@@ -11,6 +11,11 @@ export interface MotionFeatureFilter {
   values: Set<string>;
 }
 
+export interface SerializedMotionFeatureFilter {
+  type: FeatureType;
+  values: string[];
+}
+
 export const useSearchFilters = () => {
   const { filters, setFilters } = useContext(SearchFiltersContext);
 

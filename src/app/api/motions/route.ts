@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { Motion } from "../../../../index/types/motion";
 import { retrieveMotions } from "../../../../retrieval/motions/motion-retrieval";
+import { SerializedMotionFeatureFilter } from "@/app/components/search/search-filters";
 
 export type SortOption = "newest" | "oldest" | "most-relevant";
 
@@ -10,6 +11,7 @@ export interface PaginatedMotionsRequest {
   filters: {
     from?: Date;
     to?: Date;
+    requiredFeatures: SerializedMotionFeatureFilter[];
   };
   page: {
     size: number;
@@ -36,7 +38,9 @@ export async function POST(rawRequest: NextRequest) {
   const result = await retrieveMotions(motionRequest.query, {
     from: motionRequest.filters.from,
     to: motionRequest.filters.to,
-    requiredFeatures: [],
+    requiredFeatures: motionRequest.filters.requiredFeatures.map(
+      ({ type, values }) => ({ type, values: new Set(values) }),
+    ),
   });
 
   const sortedResult = sortMotions(motionRequest, result);

@@ -1,12 +1,13 @@
 import { readFile } from "fs/promises";
 import lunr from "lunr";
-import { Motion, MotionFeature } from "../../index/types/motion";
+import { Motion } from "../../index/types/motion";
 import { getMotions, getSearchIndexPath } from "../../index/util";
+import { MotionFeatureFilter } from "@/app/components/search/search-filters";
 
 export type MotionFilters = {
   from?: Date;
   to?: Date;
-  requiredFeatures: MotionFeature[];
+  requiredFeatures: MotionFeatureFilter[];
 };
 
 export async function retrieveMotions(
@@ -90,7 +91,9 @@ function filterByFeatures(
       return false;
     }
 
-    for (const requiredFeatureValue in requiredFeature.values) {
+    console.log(requiredFeature.values);
+
+    for (const requiredFeatureValue of requiredFeature.values) {
       if (!motionFeature.values.includes(requiredFeatureValue)) {
         return false;
       }

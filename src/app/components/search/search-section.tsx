@@ -39,6 +39,7 @@ const SearchSectionGuts: React.FC = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { filters } = useSearchFilters();
 
   const query = searchParams.get("query");
   const sort = searchParams.get("sort");
@@ -53,14 +54,19 @@ const SearchSectionGuts: React.FC = () => {
   };
 
   const { data: results } = useQuery<PaginatedMotionsResponse>({
-    queryKey: ["/api/motions", query, sort, pageIndex],
+    queryKey: ["/api/motions", query, sort, pageIndex, JSON.stringify(filters)],
     queryFn: async () => {
       const motionsURL = new URL("/api/motions", window.location.origin);
       const body: PaginatedMotionsRequest = {
         query,
         sort: sort as SortOption,
         page: { index: parseInt(pageIndex), size: 20 },
-        filters: {},
+        filters: {
+          requiredFeatures: filters.map(({ type, values }) => ({
+            type,
+            values: Array.from(values),
+          })),
+        },
       };
 
       return fetch(motionsURL, {
