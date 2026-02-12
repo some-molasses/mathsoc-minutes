@@ -162,7 +162,8 @@ const Pagination: React.FC<{
   return (
     <Row className="pagination-row">
       <span className="pagination-label">
-        page {data.page.index + 1} of {data.page.count}
+        {data.page.totalResults} results, page {data.page.index + 1} of{" "}
+        {data.page.pageCount}
       </span>
       <button
         className="pagination-button"
@@ -174,10 +175,11 @@ const Pagination: React.FC<{
       <button
         className="pagination-button"
         onClick={onNext}
-        disabled={data.page.index >= data.page.count - 1}
+        disabled={data.page.index >= data.page.pageCount - 1}
       >
         next page
       </button>
+      <span className="pagination-label faint"></span>
     </Row>
   );
 };

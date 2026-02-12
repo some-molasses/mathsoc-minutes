@@ -59,6 +59,10 @@
   .pagination-label {
     color: var(--text-light);
     font-size: 0.8rem;
+
+    &.faint {
+      color: var(--text-lighter);
+    }
   }
 }
 

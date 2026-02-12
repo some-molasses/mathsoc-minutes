@@ -26,7 +26,8 @@ export interface PaginatedMotionsResponse {
   page: {
     index: number;
     size: number;
-    count: number;
+    pageCount: number;
+    totalResults: number;
   };
 }
 
@@ -88,7 +89,8 @@ function paginateMotions(
     page: {
       index: request.page.index,
       size: request.page.size,
-      count: totalPageCount,
+      pageCount: totalPageCount,
+      totalResults: motions.length,
     },
   };
 }
