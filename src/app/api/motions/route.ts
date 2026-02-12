@@ -28,8 +28,10 @@ export interface PaginatedMotionsResponse {
   };
 }
 
-export async function GET(rawRequest: NextRequest) {
-  const motionRequest = extractRequest(rawRequest);
+export async function POST(rawRequest: NextRequest) {
+  const motionRequest: PaginatedMotionsRequest = JSON.parse(
+    await rawRequest.text(),
+  );
 
   const result = await retrieveMotions(motionRequest.query, {
     from: motionRequest.filters.from,
@@ -44,26 +46,6 @@ export async function GET(rawRequest: NextRequest) {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
-}
-
-function extractRequest(request: NextRequest): PaginatedMotionsRequest {
-  const searchParams = request.nextUrl.searchParams;
-  return {
-    query: searchParams.get("query"),
-    filters: {
-      from: searchParams.has("from")
-        ? new Date(searchParams.get("from")!)
-        : undefined,
-      to: searchParams.has("to")
-        ? new Date(searchParams.get("to")!)
-        : undefined,
-    },
-    page: {
-      index: parseInt(searchParams.get("pageIndex") ?? "0"),
-      size: parseInt(searchParams.get("pageSize") ?? "20"),
-    },
-    sort: (searchParams.get("sort") as SortOption) || "most relevant",
-  };
 }
 
 function sortMotions(

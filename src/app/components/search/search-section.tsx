@@ -1,7 +1,11 @@
 "use client";
 
 import { FeaturesListResponse } from "@/app/api/features/route";
-import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
+import {
+  PaginatedMotionsRequest,
+  PaginatedMotionsResponse,
+  SortOption,
+} from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Centered, Column, Row } from "./layout";
@@ -52,14 +56,17 @@ const SearchSectionGuts: React.FC = () => {
     queryKey: ["/api/motions", query, sort, pageIndex],
     queryFn: async () => {
       const motionsURL = new URL("/api/motions", window.location.origin);
-      if (query) {
-        motionsURL.searchParams.append("query", query);
-      }
-      if (sort) {
-        motionsURL.searchParams.append("sort", sort);
-      }
-      motionsURL.searchParams.append("pageIndex", pageIndex);
-      return fetch(motionsURL).then((res) => res.json());
+      const body: PaginatedMotionsRequest = {
+        query,
+        sort: sort as SortOption,
+        page: { index: parseInt(pageIndex), size: 20 },
+        filters: {},
+      };
+
+      return fetch(motionsURL, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }).then((res) => res.json());
     },
   });
 
