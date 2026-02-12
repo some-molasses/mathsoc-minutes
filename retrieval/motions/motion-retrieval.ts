@@ -91,8 +91,6 @@ function filterByFeatures(
       return false;
     }
 
-    console.log(requiredFeature.values);
-
     for (const requiredFeatureValue of requiredFeature.values) {
       if (!motionFeature.values.includes(requiredFeatureValue)) {
         return false;

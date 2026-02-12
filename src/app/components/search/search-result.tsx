@@ -6,13 +6,6 @@ import "./search-result.scss";
 import { useSearchFilters } from "./search-filters";
 
 export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
-  const { filters, isFeatureFiltered } = useSearchFilters();
-  console.log(
-    motion.features,
-    filters,
-    isFeatureFiltered("organization", "CSC"),
-  );
-
   return (
     <div className="search-result">
       <div className="result-title-section">
