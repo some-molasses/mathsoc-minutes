@@ -39,7 +39,7 @@ const SearchSectionGuts: React.FC = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { filters } = useSearchFilters();
+  const { serializedFilters } = useSearchFilters();
 
   const query = searchParams.get("query");
   const sort = searchParams.get("sort");
@@ -54,7 +54,13 @@ const SearchSectionGuts: React.FC = () => {
   };
 
   const { data: results } = useQuery<PaginatedMotionsResponse>({
-    queryKey: ["/api/motions", query, sort, pageIndex, JSON.stringify(filters)],
+    queryKey: [
+      "/api/motions",
+      query,
+      sort,
+      pageIndex,
+      JSON.stringify(serializedFilters),
+    ],
     queryFn: async () => {
       const motionsURL = new URL("/api/motions", window.location.origin);
       const body: PaginatedMotionsRequest = {
@@ -62,10 +68,7 @@ const SearchSectionGuts: React.FC = () => {
         sort: sort as SortOption,
         page: { index: parseInt(pageIndex), size: 20 },
         filters: {
-          requiredFeatures: filters.map(({ type, values }) => ({
-            type,
-            values: Array.from(values),
-          })),
+          requiredFeatures: serializedFilters,
         },
       };
 
@@ -156,7 +159,11 @@ const Pagination: React.FC<{
   onPrevious: () => void;
 }> = ({ data, onNext, onPrevious }) => {
   if (!data?.page) {
-    return <div></div>;
+    return (
+      <Row className="pagination-row">
+        <span className="pagination-label">loading...</span>
+      </Row>
+    );
   }
 
   return (

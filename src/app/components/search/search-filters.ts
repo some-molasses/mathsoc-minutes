@@ -69,8 +69,14 @@ export const useSearchFilters = () => {
     }
   };
 
+  const serializedFilters = filters.map(({ type, values }) => ({
+    type,
+    values: Array.from(values),
+  }));
+
   return {
     filters,
+    serializedFilters,
     addFilter,
     removeFilter,
     toggleFilter,
