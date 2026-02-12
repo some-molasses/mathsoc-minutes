@@ -1,11 +1,7 @@
 "use client";
 
 import { FeaturesListResponse } from "@/app/api/features/route";
-import {
-  PaginatedMotionsRequest,
-  PaginatedMotionsResponse,
-  SortOption,
-} from "@/app/api/motions/route";
+import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Centered, Column, Row } from "./layout";
@@ -18,6 +14,7 @@ import {
 } from "./search-filters";
 import { useState } from "react";
 import { FeatureType } from "../../../../index/types/motion";
+import { useSearchMotions } from "./retrieval";
 
 export type SearchQueryParams = Partial<{
   query: string;
@@ -39,7 +36,6 @@ const SearchSectionGuts: React.FC = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { serializedFilters } = useSearchFilters();
 
   const query = searchParams.get("query");
   const sort = searchParams.get("sort");
@@ -53,31 +49,7 @@ const SearchSectionGuts: React.FC = () => {
     router.replace(`${pathname}?${newParams.toString()}`);
   };
 
-  const { data: results } = useQuery<PaginatedMotionsResponse>({
-    queryKey: [
-      "/api/motions",
-      query,
-      sort,
-      pageIndex,
-      JSON.stringify(serializedFilters),
-    ],
-    queryFn: async () => {
-      const motionsURL = new URL("/api/motions", window.location.origin);
-      const body: PaginatedMotionsRequest = {
-        query,
-        sort: sort as SortOption,
-        page: { index: parseInt(pageIndex), size: 20 },
-        filters: {
-          requiredFeatures: serializedFilters,
-        },
-      };
-
-      return fetch(motionsURL, {
-        method: "POST",
-        body: JSON.stringify(body),
-      }).then((res) => res.json());
-    },
-  });
+  const { results } = useSearchMotions(query, sort, pageIndex);
 
   const onNextPage = () =>
     setParams({
