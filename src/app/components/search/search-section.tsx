@@ -23,23 +23,11 @@ export type SearchQueryParams = Partial<{
 }>;
 
 export const SearchSection = () => {
-  const [filters, setFilters] = useState<MotionFeatureFilter[]>([]);
+  const [filters, setFiltersArray] = useState<MotionFeatureFilter[]>([]);
 
-  return (
-    <SearchFiltersContext.Provider value={{ filters, setFilters }}>
-      <SearchSectionGuts />
-    </SearchFiltersContext.Provider>
-  );
-};
-
-const SearchSectionGuts: React.FC = () => {
-  const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-
-  const query = searchParams.get("query");
-  const sort = searchParams.get("sort");
-  const pageIndex = searchParams.get("page") ?? "0";
+  const searchParams = useSearchParams();
 
   const setParams = (toSet: SearchQueryParams) => {
     const newParams = new URLSearchParams(searchParams);
@@ -48,6 +36,30 @@ const SearchSectionGuts: React.FC = () => {
     }
     router.replace(`${pathname}?${newParams.toString()}`);
   };
+
+  return (
+    <SearchFiltersContext.Provider
+      value={{
+        filters,
+        setFilters: (value) => {
+          setFiltersArray(value);
+          setParams({ page: "0" });
+        },
+      }}
+    >
+      <SearchSectionGuts setParams={setParams} />
+    </SearchFiltersContext.Provider>
+  );
+};
+
+const SearchSectionGuts: React.FC<{
+  setParams: (newParams: SearchQueryParams) => void;
+}> = ({ setParams }) => {
+  const searchParams = useSearchParams();
+
+  const query = searchParams.get("query");
+  const sort = searchParams.get("sort");
+  const pageIndex = searchParams.get("page") ?? "0";
 
   const { motions, page } = useSearchMotions(query, sort, pageIndex);
 

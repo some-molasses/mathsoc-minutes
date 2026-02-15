@@ -10,10 +10,6 @@ import Link from "next/link";
 export const SearchResult: React.FC<{ motion: EnrichedMotion }> = ({
   motion,
 }) => {
-  if (!motion.meeting?.url) {
-    console.log(motion);
-  }
-
   return (
     <div className="search-result">
       <div className="result-title-section">
