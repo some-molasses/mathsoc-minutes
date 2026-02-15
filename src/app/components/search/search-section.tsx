@@ -49,7 +49,7 @@ const SearchSectionGuts: React.FC = () => {
     router.replace(`${pathname}?${newParams.toString()}`);
   };
 
-  const { results } = useSearchMotions(query, sort, pageIndex);
+  const { motions, page } = useSearchMotions(query, sort, pageIndex);
 
   const onNextPage = () =>
     setParams({
@@ -75,7 +75,7 @@ const SearchSectionGuts: React.FC = () => {
       />
       <TopBar
         onSelect={(sort) => setParams({ sort })}
-        data={results}
+        page={page}
         onNextPage={onNextPage}
         onPreviousPage={onPreviousPage}
       />
@@ -83,13 +83,13 @@ const SearchSectionGuts: React.FC = () => {
         <Filters />
         <Column>
           <div className="search-results">
-            {results?.data.motions.map((motion) => (
+            {motions?.map((motion) => (
               <SearchResult key={motion.id} motion={motion} />
             ))}
           </div>
           <Centered>
             <Pagination
-              data={results}
+              page={page}
               onNext={onNextPage}
               onPrevious={onPreviousPage}
             />
@@ -104,11 +104,11 @@ const TopBar: React.FC<{
   onSelect: (value: SortOption) => void;
   onNextPage: () => void;
   onPreviousPage: () => void;
-  data?: PaginatedMotionsResponse;
-}> = ({ onSelect, onNextPage, onPreviousPage, data }) => {
+  page?: PaginatedMotionsResponse["page"];
+}> = ({ onSelect, onNextPage, onPreviousPage, page }) => {
   return (
     <Row className="search-top-bar">
-      <Pagination data={data} onNext={onNextPage} onPrevious={onPreviousPage} />
+      <Pagination page={page} onNext={onNextPage} onPrevious={onPreviousPage} />
       <Row className="sort-button">
         <select
           name="sort"
@@ -126,11 +126,11 @@ const TopBar: React.FC<{
 };
 
 const Pagination: React.FC<{
-  data?: PaginatedMotionsResponse;
+  page?: PaginatedMotionsResponse["page"];
   onNext: () => void;
   onPrevious: () => void;
-}> = ({ data, onNext, onPrevious }) => {
-  if (!data?.page) {
+}> = ({ page, onNext, onPrevious }) => {
+  if (!page) {
     return (
       <Row className="pagination-row">
         <span className="pagination-label">loading...</span>
@@ -141,20 +141,19 @@ const Pagination: React.FC<{
   return (
     <Row className="pagination-row">
       <span className="pagination-label">
-        {data.page.totalResults} results, page {data.page.index + 1} of{" "}
-        {data.page.pageCount}
+        {page.totalResults} results, page {page.index + 1} of {page.pageCount}
       </span>
       <button
         className="pagination-button"
         onClick={onPrevious}
-        disabled={data.page.index == 0}
+        disabled={page.index == 0}
       >
         previous page
       </button>
       <button
         className="pagination-button"
         onClick={onNext}
-        disabled={data.page.index >= data.page.pageCount - 1}
+        disabled={page.index >= page.pageCount - 1}
       >
         next page
       </button>

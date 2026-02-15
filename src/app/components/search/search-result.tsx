@@ -1,11 +1,19 @@
 import { colours } from "@/app/colours";
-import { FeatureType, Motion } from "../../../../index/types/motion";
+import { FeatureType } from "../../../../index/types/motion";
 import { Organization } from "../../../../index/types/motion-features";
 import { Markdown } from "../markdown";
 import "./search-result.scss";
 import { useSearchFilters } from "./search-filters";
+import { EnrichedMotion } from "./retrieval";
+import Link from "next/link";
 
-export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
+export const SearchResult: React.FC<{ motion: EnrichedMotion }> = ({
+  motion,
+}) => {
+  if (!motion.meeting?.url) {
+    console.log(motion);
+  }
+
   return (
     <div className="search-result">
       <div className="result-title-section">
@@ -40,7 +48,9 @@ export const SearchResult: React.FC<{ motion: Motion }> = ({ motion }) => {
             ));
           })}
         </div>
-        <div className="result-id">{motion.id}</div>
+        <Link href={motion.meeting.url!}>
+          <div className="result-id">{motion.id}</div>
+        </Link>
       </div>
     </div>
   );

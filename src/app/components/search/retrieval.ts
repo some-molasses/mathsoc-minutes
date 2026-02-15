@@ -6,6 +6,12 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useSearchFilters } from "./search-filters";
 import { MeetingsResponse } from "../../../../retrieval/meetings/meeting-retrieval";
+import { Meeting } from "../../../../index/parse/parse";
+import { Motion } from "../../../../index/types/motion";
+
+export type EnrichedMotion = Omit<Omit<Motion, "toJSON">, "textContents"> & {
+  meeting: Meeting;
+};
 
 export const useSearchMotions = (
   query: string | null,
@@ -14,7 +20,7 @@ export const useSearchMotions = (
 ) => {
   const { serializedFilters } = useSearchFilters();
 
-  const { data: results } = useQuery<PaginatedMotionsResponse>({
+  const { data: motionResults } = useQuery<PaginatedMotionsResponse>({
     queryKey: [
       "/api/motions",
       query,
@@ -40,13 +46,43 @@ export const useSearchMotions = (
     },
   });
 
-  const ids = results?.data.motions.map((motion) => motion.meetingId) ?? [];
+  const ids =
+    motionResults?.data.motions.map((motion) => motion.meetingId) ?? [];
   const { data: meetingsArray } = useMeetings(ids);
-  const meetings = new Map(
-    meetingsArray?.meetings.map((meeting) => [meeting.id, meeting]),
+
+  const enrichedMotions: EnrichedMotion[] = enrichMotions(
+    motionResults?.data.motions,
+    meetingsArray?.meetings,
   );
 
-  return { results, meetings };
+  return { motions: enrichedMotions, page: motionResults?.page };
+};
+
+const enrichMotions = (
+  motions?: Motion[],
+  meetings?: Meeting[],
+): EnrichedMotion[] => {
+  if (!motions || !meetings) {
+    return [];
+  }
+
+  const meetingsMap = new Map(
+    meetings?.map((meeting) => [meeting.id, meeting]),
+  );
+
+  return (
+    motions.map((motion) => {
+      const meeting = meetingsMap.get(motion.meetingId);
+      if (!meeting) {
+        throw new Error(`no meeting for ${motion.id}?`);
+      }
+
+      return {
+        ...motion,
+        meeting,
+      };
+    }) ?? []
+  );
 };
 
 export const useMeetings = (ids: string[]) => {

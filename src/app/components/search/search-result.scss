@@ -68,5 +68,10 @@
     font-size: 0.6rem;
     text-align: right;
     align-self: flex-end;
+    transition: var(--transition);
+
+    &:hover {
+      color: var(--mathsoc-pink);
+    }
   }
 }
