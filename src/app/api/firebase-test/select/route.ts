@@ -1,18 +1,14 @@
 // app/api/motions/route.ts
 import { adminDb } from "@/app/firebase/firebase-admin";
 import { NextResponse } from "next/server";
-
-// Define the type for your motion data
-export interface FirebaseMotion {
-  id: string;
-  // Add other fields present in your 'motions' collection
-  name?: string; // Example field
-  description?: string; // Example field
-}
+import { FirebaseMotion } from "../route";
 
 export async function GET() {
   const motionsCollectionRef = adminDb.collection("motions");
-  const querySnapshot = await motionsCollectionRef.get();
+  const querySnapshot = await motionsCollectionRef
+    .select("title")
+    .where("title", "==", "Settlers of Catan")
+    .get();
 
   const motions: FirebaseMotion[] = [];
   querySnapshot.forEach((doc) => {
