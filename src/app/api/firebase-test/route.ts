@@ -1,5 +1,5 @@
 // app/api/motions/route.ts
-import { getSSRAuthenticatedAppForUser } from "@/app/firebase/firebase-server";
+import { adminDb } from "@/app/firebase/firebase-admin";
 import { NextResponse } from "next/server";
 
 // Define the type for your motion data
@@ -11,9 +11,7 @@ interface FirebaseMotion {
 }
 
 export async function GET() {
-  const { firestore } = await getSSRAuthenticatedAppForUser();
-
-  const motionsCollectionRef = firestore.collection("motions");
+  const motionsCollectionRef = adminDb.collection("motions");
   const querySnapshot = await motionsCollectionRef.get();
 
   const motions: FirebaseMotion[] = [];
