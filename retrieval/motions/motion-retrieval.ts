@@ -1,8 +1,9 @@
+import { MotionFeatureFilter } from "@/app/components/search/search-filters";
+import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { readFile } from "fs/promises";
 import lunr from "lunr";
 import { Motion } from "../../index/types/motion";
-import { getMotions, getSearchIndexPath } from "../../index/util";
-import { MotionFeatureFilter } from "@/app/components/search/search-filters";
+import { getSearchIndexPath } from "../../index/util";
 
 export type MotionFilters = {
   from?: Date;
@@ -14,10 +15,7 @@ export async function retrieveMotions(
   query: string | null,
   filters: MotionFilters,
 ): Promise<Motion[]> {
-  const motions = await getMotions();
-  const baseResults = query
-    ? await searchMotions(query, motions)
-    : Object.values(motions);
+  const baseResults = query ? await searchMotions(query) : [];
 
   // @todo make sorting better; provide options
   return filterResults(baseResults, filters).sort((a, b) =>
@@ -25,16 +23,35 @@ export async function retrieveMotions(
   );
 }
 
-async function searchMotions(
-  query: string,
-  motions: Record<string, Motion>,
-): Promise<Motion[]> {
+async function searchMotions(query: string): Promise<Motion[]> {
   const index = await loadIndex();
   const results = index.search(query);
 
-  const motionResults = results.map((result) => motions[result.ref]);
+  const motions: Motion[] = [];
+  await Promise.all(
+    results.map(async (result) => {
+      return mathsocFirestore
+        .collection("motions")
+        .select(
+          "id",
+          "meetingId",
+          "motionNumber",
+          "date",
+          "title",
+          "body",
+          "features",
+        )
+        .where("id", "==", result.ref)
+        .get()
+        .then((res) =>
+          res.forEach((doc) =>
+            motions.push({ id: doc.id, ...doc.data() } as Motion),
+          ),
+        );
+    }),
+  );
 
-  return motionResults;
+  return motions;
 }
 
 type FilterFunction = (motion: Motion, filters: MotionFilters) => boolean;
