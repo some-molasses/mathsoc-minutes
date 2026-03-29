@@ -1,10 +1,10 @@
 // app/api/motions/route.ts
-import { firestore } from "@/app/firebase/firebase-admin";
+import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { NextResponse } from "next/server";
 import { FirebaseMotion } from "../route";
 
 export async function GET() {
-  const motionsCollectionRef = firestore.collection("motions");
+  const motionsCollectionRef = mathsocFirestore.collection("motions");
   const querySnapshot = await motionsCollectionRef
     .select("title")
     .where("title", "==", "Settlers of Catan")

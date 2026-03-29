@@ -1,5 +1,5 @@
 import { MeetingData } from "@/app/data/types";
-import { firestore } from "@/app/firebase/firebase-admin";
+import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { Motion } from "../types/motion";
@@ -17,8 +17,12 @@ export type ParsedMeetingDetail = Meeting & {
 };
 
 async function clearExistingMotionData() {
-  await firestore.recursiveDelete(firestore.collection("motions"));
-  await firestore.recursiveDelete(firestore.collection("meetings"));
+  await mathsocFirestore.recursiveDelete(
+    mathsocFirestore.collection("motions"),
+  );
+  await mathsocFirestore.recursiveDelete(
+    mathsocFirestore.collection("meetings"),
+  );
 }
 
 export async function parseAllMeetings() {
@@ -39,7 +43,7 @@ export async function parseAllMeetings() {
       const meeting = parseMeeting(meetingPath.id, meta, agenda);
 
       if (shouldWriteToFirebase()) {
-        await firestore.collection("meetings").doc(meeting.id).set({
+        await mathsocFirestore.collection("meetings").doc(meeting.id).set({
           id: meeting.id,
           date: meeting.date,
           url: meeting.url,
@@ -47,7 +51,7 @@ export async function parseAllMeetings() {
 
         await Promise.all(
           meeting.motions.map(async (motion) => {
-            await firestore
+            await mathsocFirestore
               .collection("motions")
               .doc(motion.id)
               .set(motion.toJSON());

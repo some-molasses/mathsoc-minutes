@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
-import { getMeetingsFilePath } from "../../index/util";
 import { Meeting } from "../../index/parse/parse";
+import { getMeetingsFilePath } from "../../index/util";
 
 export interface MeetingsResponse {
   meetings: Meeting[];

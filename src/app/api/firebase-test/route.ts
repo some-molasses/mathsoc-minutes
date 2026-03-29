@@ -1,5 +1,5 @@
 // app/api/motions/route.ts
-import { firestore } from "@/app/firebase/firebase-admin";
+import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { NextResponse } from "next/server";
 
 // Define the type for your motion data
@@ -11,7 +11,7 @@ export interface FirebaseMotion {
 }
 
 export async function GET() {
-  const motionsCollectionRef = firestore.collection("motions");
+  const motionsCollectionRef = mathsocFirestore.collection("motions");
   const querySnapshot = await motionsCollectionRef.get();
 
   const motions: FirebaseMotion[] = [];

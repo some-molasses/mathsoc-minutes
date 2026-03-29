@@ -49,4 +49,4 @@ function getFirebaseAdminApp(): App {
 // Call once at module level — safe due to the guard above
 getFirebaseAdminApp();
 
-export const firestore: Firestore = getFirestore();
+export const mathsocFirestore: Firestore = getFirestore();
