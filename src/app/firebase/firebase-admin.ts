@@ -1,12 +1,15 @@
 // lib/firebaseAdmin.ts
+import dotenv from "dotenv";
 import { App, cert, getApp, getApps, initializeApp } from "firebase-admin/app";
-import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { Firestore, getFirestore } from "firebase-admin/firestore";
 
 function getFirebaseAdminApp(): App {
   // If already initialized, return existing app
   if (getApps().length > 0) {
     return getApp();
   }
+
+  dotenv.config();
 
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -46,4 +49,4 @@ function getFirebaseAdminApp(): App {
 // Call once at module level — safe due to the guard above
 getFirebaseAdminApp();
 
-export const adminDb: Firestore = getFirestore();
+export const firestore: Firestore = getFirestore();

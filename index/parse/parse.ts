@@ -1,8 +1,9 @@
 import { MeetingData } from "@/app/data/types";
+import { firestore } from "@/app/firebase/firebase-admin";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { Motion } from "../types/motion";
-import { getMeetingsSubdirectories } from "../util";
+import { getMeetingsSubdirectories, shouldWriteToFirebase } from "../util";
 
 export type Meeting = {
   id: string;
@@ -15,20 +16,49 @@ export type ParsedMeetingDetail = Meeting & {
   raw: string;
 };
 
+async function clearExistingMotionData() {
+  await firestore.recursiveDelete(firestore.collection("motions"));
+  await firestore.recursiveDelete(firestore.collection("meetings"));
+}
+
 export async function parseAllMeetings() {
   const meetingPaths = await getPaths();
 
-  for (const meetingPath of meetingPaths) {
-    const meta: MeetingData = await readFile(meetingPath.meta).then((res) =>
-      JSON.parse(res.toString()),
-    );
-    const agenda = await readFile(meetingPath.agenda).then((res) =>
-      res.toString(),
-    );
-    const parsed = parseMeeting(meetingPath.id, meta, agenda);
-
-    await writeFile(meetingPath.parsed, JSON.stringify(parsed, null, 2));
+  if (shouldWriteToFirebase()) {
+    await clearExistingMotionData();
   }
+
+  await Promise.all(
+    meetingPaths.map(async (meetingPath) => {
+      const meta: MeetingData = await readFile(meetingPath.meta).then((res) =>
+        JSON.parse(res.toString()),
+      );
+      const agenda = await readFile(meetingPath.agenda).then((res) =>
+        res.toString(),
+      );
+      const meeting = parseMeeting(meetingPath.id, meta, agenda);
+
+      if (shouldWriteToFirebase()) {
+        await firestore.collection("meetings").doc(meeting.id).set({
+          id: meeting.id,
+          date: meeting.date,
+          url: meeting.url,
+        });
+
+        await Promise.all(
+          meeting.motions.map(async (motion) => {
+            await firestore
+              .collection("motions")
+              .doc(motion.id)
+              .set(motion.toJSON());
+            console.log(`Added ${motion.id} to Firebase`);
+          }),
+        );
+      } else {
+        await writeFile(meetingPath.parsed, JSON.stringify(meeting, null, 2));
+      }
+    }),
+  );
 }
 
 async function getPaths(): Promise<

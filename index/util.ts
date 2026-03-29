@@ -35,6 +35,10 @@ export async function getMotions(): Promise<Record<string, Motion>> {
   );
 }
 
+export function shouldWriteToFirebase() {
+  return process.env.WRITE_REMOTE == "true";
+}
+
 export async function getMeetingsSubdirectories() {
   const meetingsDirectory = getMeetingsDirectory();
   const meetingSubdirectories = (await readdir(meetingsDirectory))
