@@ -4,7 +4,7 @@ import { FeaturesListResponse } from "@/app/api/features/route";
 import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { use, useState } from "react";
 import { FeatureType } from "../../../../index/types/motion";
 import { Centered, Column, Row } from "./layout-components";
 import { useSearchMotions } from "./retrieval";
@@ -22,12 +22,14 @@ export type SearchQueryParams = Partial<{
   page: string;
 }>;
 
-export const SearchSection = () => {
+export const SearchSection: React.FC<{
+  query: Promise<{ q?: string }>;
+}> = ({ query }) => {
   const [filters, setFiltersArray] = useState<MotionFeatureFilter[]>([]);
 
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = use(query);
 
   const setParams = (toSet: SearchQueryParams) => {
     const newParams = new URLSearchParams(searchParams);
