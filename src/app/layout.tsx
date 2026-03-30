@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClientLayout } from "./components/client-layout";
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClientLayout>{children}</ClientLayout>
       </body>
+      <GoogleAnalytics gaId="G-XYZ" />
     </html>
   );
 }
