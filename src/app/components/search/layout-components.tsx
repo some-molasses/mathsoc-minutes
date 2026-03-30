@@ -1,4 +1,4 @@
-import "./layout.scss";
+import "./layout-components.scss";
 
 type LayoutProps = {
   children?: React.ReactNode;

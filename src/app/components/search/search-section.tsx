@@ -4,17 +4,17 @@ import { FeaturesListResponse } from "@/app/api/features/route";
 import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Centered, Column, Row } from "./layout";
-import { SearchResult } from "./search-result";
-import "./search-section.scss";
+import { useState } from "react";
+import { FeatureType } from "../../../../index/types/motion";
+import { Centered, Column, Row } from "./layout-components";
+import { useSearchMotions } from "./retrieval";
 import {
   MotionFeatureFilter,
   SearchFiltersContext,
   useSearchFilters,
 } from "./search-filters";
-import { useState } from "react";
-import { FeatureType } from "../../../../index/types/motion";
-import { useSearchMotions } from "./retrieval";
+import { SearchResult } from "./search-result";
+import "./search-section.scss";
 
 export type SearchQueryParams = Partial<{
   query: string;
