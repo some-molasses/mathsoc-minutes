@@ -1,15 +1,7 @@
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
-import { readFile } from "fs/promises";
 import { FeatureValuesMap } from "../../index/postprocess/features";
-import { getFeaturesListPath } from "../../index/util";
 
-export const retrieveFeatures = async (): Promise<{
-  [key: string]: string[];
-}> => {
-  const featureList = await readFile(getFeaturesListPath()).then((res) =>
-    JSON.parse(res.toString()),
-  );
-
+export const retrieveFeatures = async (): Promise<FeatureValuesMap> => {
   const features: FeatureValuesMap = {};
   await mathsocFirestore
     .collection("features")
@@ -20,5 +12,5 @@ export const retrieveFeatures = async (): Promise<{
       }),
     );
 
-  return featureList;
+  return features;
 };

@@ -15,9 +15,9 @@ export async function GET() {
   const result = await retrieveFeatures();
 
   const formattedResult: FeaturesListResponse = {
-    organization: { label: "Organization", values: result.organization },
-    body: { label: "Body", values: result.body },
-    isMonetary: { label: "Nature", values: result.isMonetary },
+    organization: { label: "Organization", values: result.organization.values },
+    body: { label: "Body", values: result.body.values },
+    isMonetary: { label: "Nature", values: result.isMonetary.values },
   };
 
   return new Response(JSON.stringify(formattedResult), {
