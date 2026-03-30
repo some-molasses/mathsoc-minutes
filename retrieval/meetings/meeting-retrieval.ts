@@ -1,6 +1,5 @@
-import { readFile } from "fs/promises";
+import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { Meeting } from "../../index/parse/parse";
-import { getMeetingsFilePath } from "../../index/util";
 
 export interface MeetingsResponse {
   meetings: Meeting[];
@@ -11,11 +10,11 @@ export const retrieveMeetings = async ({
 }: {
   ids: string[];
 }): Promise<MeetingsResponse> => {
-  const meetingsMap = (await readFile(getMeetingsFilePath()).then((res) =>
-    JSON.parse(res.toString()),
-  )) as Record<string, Meeting>;
+  const results: Meeting[] = await mathsocFirestore
+    .collection("meetings")
+    .where("id", "in", ids)
+    .get()
+    .then((res) => res.docs.map((doc) => doc.data() as Meeting));
 
-  const meetings = ids.map((id) => meetingsMap[id]);
-
-  return { meetings };
+  return { meetings: results };
 };
