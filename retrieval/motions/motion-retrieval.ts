@@ -13,12 +13,25 @@ export async function retrieveMotions(
   query: string | null,
   filters: MotionFilters,
 ): Promise<Motion[]> {
-  const baseResults = query ? await searchMotions(query) : [];
+  const baseResults = query
+    ? await searchMotions(query)
+    : await getSampleMotions();
 
   // @todo make sorting better; provide options
   return filterResults(baseResults, filters).sort((a, b) =>
     new Date(a.date) < new Date(b.date) ? 1 : -1,
   );
+}
+
+async function getSampleMotions(): Promise<Motion[]> {
+  return await mathsocFirestore
+    .collection("motions")
+    .limit(40)
+    .orderBy("date", "desc")
+    .get()
+    .then((res) =>
+      res.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Motion),
+    );
 }
 
 async function searchMotions(query: string): Promise<Motion[]> {
@@ -40,6 +53,7 @@ async function searchMotions(query: string): Promise<Motion[]> {
           "features",
         )
         .where("id", "==", result.ref)
+        .limit(30)
         .get()
         .then((res) =>
           res.forEach((doc) =>

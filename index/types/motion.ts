@@ -35,6 +35,7 @@ export class Motion {
   toJSON() {
     return {
       ...this,
+      date: new Date(this.date).toISOString(),
       features: Array.from(this.features),
     };
   }
