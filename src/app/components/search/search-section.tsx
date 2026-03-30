@@ -155,7 +155,7 @@ const Pagination: React.FC<{
   return (
     <Row className="pagination-row">
       <span className="pagination-label">
-        {page.totalResults} results, page {page.index + 1} of {page.pageCount}
+        {page.total} results, page {page.index + 1} of {page.pageCount}
       </span>
       <button
         className="pagination-button"

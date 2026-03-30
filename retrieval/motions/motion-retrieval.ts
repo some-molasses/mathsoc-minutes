@@ -1,3 +1,7 @@
+import {
+  PaginatedMotionsRequest,
+  PaginatedMotionsResponse,
+} from "@/app/api/motions/route";
 import { MotionFeatureFilter } from "@/app/components/search/search-filters";
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import lunr from "lunr";
@@ -9,80 +13,142 @@ export type MotionFilters = {
   requiredFeatures: MotionFeatureFilter[];
 };
 
+export type PageConfig = {
+  start?: string;
+  size: number;
+};
+
+export type PageResult<T> = {
+  data: T[];
+  totalResultCount: number;
+};
+
 export async function retrieveMotions(
-  query: string | null,
-  filters: MotionFilters,
-): Promise<Motion[]> {
-  const baseResults = query
-    ? await searchMotions(query)
-    : await getSampleMotions();
+  request: PaginatedMotionsRequest,
+): Promise<PaginatedMotionsResponse> {
+  const baseResults: PageResult<Motion> = request.query
+    ? await searchMotions(request)
+    : await getSampleMotions(request);
 
   // @todo make sorting better; provide options
-  return filterResults(baseResults, filters).sort((a, b) =>
-    new Date(a.date) < new Date(b.date) ? 1 : -1,
-  );
+  const filteredResults = filterResults(baseResults, request);
+  return {
+    data: { motions: filteredResults.data },
+    page: {
+      size: request.page.size,
+      index: request.page.index,
+      total: filteredResults.totalResultCount,
+      pageCount: Math.ceil(
+        filteredResults.totalResultCount / request.page.size,
+      ),
+    },
+  };
 }
 
-async function getSampleMotions(): Promise<Motion[]> {
-  return await mathsocFirestore
-    .collection("motions")
-    .limit(40)
-    .orderBy("date", "desc")
+async function getSampleMotions(
+  request: PaginatedMotionsRequest,
+): Promise<PageResult<Motion>> {
+  const sortedQuery = sortQuery(
+    mathsocFirestore.collection("motions"),
+    request,
+  );
+  const paginatedQuery = paginateQuery(sortedQuery, request);
+
+  const results = await paginatedQuery
     .get()
     .then((res) =>
       res.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Motion),
     );
+
+  return {
+    data: results.slice(0, results.length - 1),
+    totalResultCount: (await sortedQuery.count().get()).data().count,
+  };
 }
 
-async function searchMotions(query: string): Promise<Motion[]> {
+async function searchMotions(
+  request: PaginatedMotionsRequest,
+): Promise<PageResult<Motion>> {
   const index = await loadIndex();
-  const results = index.search(query);
+  const searchResults = index.search(request.query!);
 
-  const motions: Motion[] = [];
-  await Promise.all(
-    results.map(async (result) => {
-      return mathsocFirestore
-        .collection("motions")
-        .select(
-          "id",
-          "meetingId",
-          "motionNumber",
-          "date",
-          "title",
-          "body",
-          "features",
-        )
-        .where("id", "==", result.ref)
-        .limit(30)
-        .get()
-        .then((res) =>
-          res.forEach((doc) =>
-            motions.push({ id: doc.id, ...doc.data() } as Motion),
-          ),
-        );
-    }),
-  );
+  const start = request.page.size * request.page.index;
+  const idsToRetrieve = searchResults
+    .slice(start, start + request.page.size)
+    .map(({ ref }) => ref);
 
-  return motions;
+  let query = sortQuery(mathsocFirestore.collection("motions"), request);
+  query = query.where("id", "in", idsToRetrieve);
+
+  const motions = await query
+    .get()
+    .then((res) =>
+      res.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Motion),
+    );
+
+  return {
+    data: motions,
+    totalResultCount: searchResults.length,
+  };
 }
 
-type FilterFunction = (motion: Motion, filters: MotionFilters) => boolean;
-function filterResults(results: Motion[], filters: MotionFilters) {
+function sortQuery(
+  query: FirebaseFirestore.CollectionReference,
+  request: PaginatedMotionsRequest,
+): FirebaseFirestore.Query {
+  switch (request.sort) {
+    case "newest": {
+      return query.orderBy("date", "desc");
+    }
+    case "oldest": {
+      return query.orderBy("date", "asc");
+    }
+    default:
+    case "most-relevant": {
+      return query;
+    }
+  }
+}
+
+function paginateQuery(
+  query: FirebaseFirestore.Query,
+  request: PaginatedMotionsRequest,
+): FirebaseFirestore.Query {
+  query = query.limit(request.page.size);
+  if (request.page.index) {
+    query = query.offset(request.page.index * request.page.size);
+  }
+
+  return query;
+}
+
+type FilterFunction = (
+  motion: Motion,
+  filters: PaginatedMotionsRequest,
+) => boolean;
+function filterResults(
+  results: PageResult<Motion>,
+  request: PaginatedMotionsRequest,
+): PageResult<Motion> {
   const filterFunctions: FilterFunction[] = [
-    filters.requiredFeatures ? filterByFeatures : null,
-    filters.from ? filterByFromDate : null,
-    filters.to ? filterByToDate : null,
+    request.filters.requiredFeatures ? filterByFeatures : null,
+    request.filters.from ? filterByFromDate : null,
+    request.filters.to ? filterByToDate : null,
   ].filter((fn) => fn) as FilterFunction[];
 
-  return results.filter((result) => {
-    for (const filter of filterFunctions) {
-      if (!filter(result, filters)) {
-        return false;
+  return {
+    data: results.data.filter((result) => {
+      for (const filter of filterFunctions) {
+        if (!filter(result, request)) {
+          return false;
+        }
       }
-    }
 
-    return true;
-  });
+      return true;
+    }),
+    // @todo make this in any way accurate
+    totalResultCount: results.totalResultCount,
+  };
 }
 
 async function loadIndex(): Promise<lunr.Index> {
@@ -104,23 +170,21 @@ async function loadIndex(): Promise<lunr.Index> {
 
 function filterByFromDate(
   motion: Motion,
-  filters: Required<Pick<MotionFilters, "from">>,
+  request: PaginatedMotionsRequest,
 ): boolean {
-  return filters.from <= new Date(motion.date);
+  return request.filters.from! <= new Date(motion.date);
 }
 
 function filterByToDate(
   motion: Motion,
-  filters: Required<Pick<MotionFilters, "to">>,
+  request: PaginatedMotionsRequest,
 ): boolean {
-  return new Date(motion.date) <= filters.to;
+  return new Date(motion.date) <= request.filters.to!;
 }
 
-function filterByFeatures(
-  motion: Motion,
-  filters: Required<Pick<MotionFilters, "requiredFeatures">>,
-) {
-  for (const requiredFeature of filters.requiredFeatures) {
+function filterByFeatures(motion: Motion, request: PaginatedMotionsRequest) {
+  const requiredSet = new Set(request.filters.requiredFeatures);
+  for (const requiredFeature of requiredSet) {
     const motionFeature = motion.features.find(
       (feature) => feature.type == requiredFeature.type,
     );
