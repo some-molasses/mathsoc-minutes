@@ -1,9 +1,7 @@
 import { MotionFeatureFilter } from "@/app/components/search/search-filters";
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
-import { readFile } from "fs/promises";
 import lunr from "lunr";
 import { Motion } from "../../index/types/motion";
-import { getSearchIndexPath } from "../../index/util";
 
 export type MotionFilters = {
   from?: Date;
@@ -74,9 +72,18 @@ function filterResults(results: Motion[], filters: MotionFilters) {
 }
 
 async function loadIndex(): Promise<lunr.Index> {
-  const serializedIndex = await readFile(getSearchIndexPath()).then((res) =>
-    JSON.parse(res.toString()),
-  );
+  const indexChunks = await mathsocFirestore
+    .collection("index")
+    .get()
+    .then((res) =>
+      res.docs.map(
+        (doc) => ({ ...doc.data() }) as { chunk: string; index: number },
+      ),
+    )
+    .then((res) => res.sort((a, b) => (a.index < b.index ? -1 : 1)));
+
+  const assembledString = indexChunks.map(({ chunk }) => chunk).join("");
+  const serializedIndex = JSON.parse(assembledString);
 
   return lunr.Index.load(serializedIndex);
 }
