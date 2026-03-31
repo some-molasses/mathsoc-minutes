@@ -4,6 +4,7 @@ import {
 } from "@/app/api/motions/route";
 import { MotionFeatureFilter } from "@/app/components/search/search-filters";
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
+import { FieldPath } from "firebase-admin/firestore";
 import lunr from "lunr";
 import { Motion } from "../../index/types/motion";
 
@@ -76,7 +77,7 @@ async function searchMotions(
     .map(({ ref }) => ref);
 
   let query = sortQuery(mathsocFirestore.collection("motions"), request);
-  query = query.where("id", "in", idsToRetrieve);
+  query = query.where(FieldPath.documentId(), "in", idsToRetrieve);
   query = filterQuery(query, request);
 
   const motions = await query
