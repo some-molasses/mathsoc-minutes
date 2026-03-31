@@ -76,6 +76,10 @@ async function searchMotions(
     .slice(start, start + request.page.size)
     .map(({ ref }) => ref);
 
+  if (idsToRetrieve.length === 0) {
+    return { data: [], totalResultCount: 0 };
+  }
+
   let query = sortQuery(mathsocFirestore.collection("motions"), request);
   query = query.where(FieldPath.documentId(), "in", idsToRetrieve);
   query = filterQuery(query, request);
