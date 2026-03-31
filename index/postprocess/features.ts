@@ -1,5 +1,6 @@
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { writeFile } from "fs/promises";
+import { FeatureValue } from "../types/motion";
 import {
   getFeaturesListPath,
   getMotions,
@@ -7,7 +8,7 @@ import {
 } from "../util";
 
 export interface FeatureValuesMap {
-  [featureName: string]: { values: string[] };
+  [featureName: string]: { values: FeatureValue[] };
 }
 
 async function writeResults(features: FeatureValuesMap) {
@@ -34,12 +35,12 @@ export async function writeFeatureList() {
   const motionsList = Object.values(motions);
 
   const features = motionsList.reduce((map, motion) => {
-    for (const feature of motion.features) {
-      const existingSet = map.get(feature.type) ?? new Set();
-      for (const value of feature.values) {
+    for (const [type, values] of Object.entries(motion.features)) {
+      const existingSet = map.get(type) ?? new Set();
+      for (const value of values) {
         existingSet.add(value);
       }
-      map.set(feature.type, existingSet);
+      map.set(type, existingSet);
     }
     return map;
   }, new Map<string, Set<string>>());

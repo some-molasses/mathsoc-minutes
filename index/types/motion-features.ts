@@ -1,26 +1,17 @@
-import { Motion, MotionFeature } from "./motion";
+import {
+  MeetingBody,
+  MonetaryRelation,
+  Motion,
+  MotionFeatures,
+  Organization,
+} from "./motion";
 
-export type Organization =
-  | "PMC"
-  | "CSC"
-  | "DDC"
-  | "DSC"
-  | "FARMSA"
-  | "Stats Club"
-  | "ActSci Club"
-  | "mathNEWS"
-  | "MathSoc Cartoons"; // also an affiliate
-
-export type MeetingBody = "Council" | "Board" | "General meeting";
-
-export type MonetaryRelation = "Monetary" | "Non-monetary";
-
-export function generateTags(motion: Motion): MotionFeature[] {
-  return [
-    { type: "organization", values: [...tagOrganizations(motion)] },
-    { type: "body", values: [tagMeetingBody(motion)] },
-    { type: "isMonetary", values: [tagIsMonetary(motion)] },
-  ];
+export function generateTags(motion: Motion): MotionFeatures {
+  return {
+    organizations: [...tagOrganizations(motion)],
+    body: [tagMeetingBody(motion)],
+    monetaryRelation: [tagIsMonetary(motion)],
+  };
 }
 
 function tagMeetingBody(motion: Motion): MeetingBody {

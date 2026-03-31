@@ -1,15 +1,24 @@
 import { colours } from "@/app/colours";
-import { FeatureType } from "../../../../index/types/motion";
-import { Organization } from "../../../../index/types/motion-features";
-import { Markdown } from "../markdown";
-import "./search-result.scss";
-import { useSearchFilters } from "./search-filters";
-import { EnrichedMotion } from "./retrieval";
 import Link from "next/link";
+import {
+  FeatureType,
+  FeatureValue,
+  Organization,
+} from "../../../../index/types/motion";
+import { Markdown } from "../markdown";
+import { EnrichedMotion } from "./retrieval";
+import { useSearchFilters } from "./search-filters";
+import "./search-result.scss";
 
 export const SearchResult: React.FC<{ motion: EnrichedMotion }> = ({
   motion,
 }) => {
+  const featureList: { type: FeatureType; values: FeatureValue[] }[] = [
+    { type: "organizations", values: motion.features.organizations },
+    { type: "body", values: motion.features.body },
+    { type: "monetaryRelation", values: motion.features.monetaryRelation },
+  ];
+
   return (
     <div className="search-result">
       <div className="result-title-section">
@@ -29,7 +38,7 @@ export const SearchResult: React.FC<{ motion: EnrichedMotion }> = ({
       </div>
       <div className="result-bottom-row">
         <div className="result-features">
-          {motion.features.map((feature) => {
+          {featureList.map((feature) => {
             if (feature.values === undefined) {
               console.error(feature);
               throw new Error();
@@ -54,13 +63,13 @@ export const SearchResult: React.FC<{ motion: EnrichedMotion }> = ({
 
 const SearchResultFeature: React.FC<{
   featureType: FeatureType;
-  value: string;
+  value: FeatureValue;
 }> = ({ featureType, value }) => {
   const { toggleFilter, isFeatureFiltered } = useSearchFilters();
 
   const getDotColor = () => {
     switch (featureType) {
-      case "organization": {
+      case "organizations": {
         switch (value as Organization) {
           case "ActSci Club":
             return colours.organizations.actSci;

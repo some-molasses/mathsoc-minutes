@@ -1,5 +1,6 @@
 import { mathsocFirestore } from "@/app/firebase/firebase-admin";
 import { FeatureValuesMap } from "../../index/postprocess/features";
+import { FeatureValue } from "../../index/types/motion";
 
 export const retrieveFeatures = async (): Promise<FeatureValuesMap> => {
   const features: FeatureValuesMap = {};
@@ -8,7 +9,7 @@ export const retrieveFeatures = async (): Promise<FeatureValuesMap> => {
     .get()
     .then((res) =>
       res.forEach((doc) => {
-        features[doc.id] = { ...doc.data() } as { values: string[] };
+        features[doc.id] = { ...doc.data() } as { values: FeatureValue[] };
       }),
     );
 

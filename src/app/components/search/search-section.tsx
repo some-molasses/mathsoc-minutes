@@ -5,14 +5,14 @@ import { PaginatedMotionsResponse, SortOption } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
-import { FeatureType } from "../../../../index/types/motion";
+import {
+  FeatureType,
+  FeatureValue,
+  MotionFeatures,
+} from "../../../../index/types/motion";
 import { Centered, Column, Row } from "./layout-components";
 import { useSearchMotions } from "./retrieval";
-import {
-  MotionFeatureFilter,
-  SearchFiltersContext,
-  useSearchFilters,
-} from "./search-filters";
+import { SearchFiltersContext, useSearchFilters } from "./search-filters";
 import { SearchResult } from "./search-result";
 import "./search-section.scss";
 
@@ -25,7 +25,7 @@ export type SearchQueryParams = Partial<{
 export const SearchSection: React.FC<{
   query: Promise<{ q?: string }>;
 }> = ({ query }) => {
-  const [filters, setFiltersArray] = useState<MotionFeatureFilter[]>([]);
+  const [filters, setFiltersArray] = useState<Partial<MotionFeatures>>({});
 
   const pathname = usePathname();
   const router = useRouter();
@@ -205,7 +205,7 @@ const Filters: React.FC = () => {
 const FeatureSection: React.FC<{
   label: string;
   type: FeatureType;
-  featureValues: string[];
+  featureValues: FeatureValue[];
 }> = ({ label, type, featureValues }) => {
   const { isFeatureFiltered, toggleFilter } = useSearchFilters();
 

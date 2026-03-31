@@ -4,10 +4,10 @@ import {
   SortOption,
 } from "@/app/api/motions/route";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchFilters } from "./search-filters";
-import { MeetingsResponse } from "../../../../retrieval/meetings/meeting-retrieval";
 import { Meeting } from "../../../../index/parse/parse";
 import { Motion } from "../../../../index/types/motion";
+import { MeetingsResponse } from "../../../../retrieval/meetings/meeting-retrieval";
+import { useSearchFilters } from "./search-filters";
 
 export type EnrichedMotion = Omit<Omit<Motion, "toJSON">, "textContents"> & {
   meeting: Meeting;
@@ -18,16 +18,10 @@ export const useSearchMotions = (
   sort: string | null,
   pageIndex: string,
 ) => {
-  const { serializedFilters } = useSearchFilters();
+  const { filters } = useSearchFilters();
 
   const { data: motionResults } = useQuery<PaginatedMotionsResponse>({
-    queryKey: [
-      "/api/motions",
-      query,
-      sort,
-      pageIndex,
-      JSON.stringify(serializedFilters),
-    ],
+    queryKey: ["/api/motions", query, sort, pageIndex, JSON.stringify(filters)],
     queryFn: async () => {
       const motionsURL = new URL("/api/motions", window.location.origin);
       const body: PaginatedMotionsRequest = {
@@ -35,7 +29,7 @@ export const useSearchMotions = (
         sort: sort as SortOption,
         page: { index: parseInt(pageIndex), size: 20 },
         filters: {
-          requiredFeatures: serializedFilters,
+          requiredFeatures: filters,
         },
       };
 
@@ -79,6 +73,7 @@ const enrichMotions = (
 
       return {
         ...motion,
+        isPreamble: motion.isPreamble,
         meeting,
       };
     }) ?? []

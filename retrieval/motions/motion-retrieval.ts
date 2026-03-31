@@ -26,21 +26,17 @@ export type PageResult<T> = {
 export async function retrieveMotions(
   request: PaginatedMotionsRequest,
 ): Promise<PaginatedMotionsResponse> {
-  const baseResults: PageResult<Motion> = request.query
+  const results: PageResult<Motion> = request.query
     ? await searchMotions(request)
     : await getSampleMotions(request);
 
-  // @todo make sorting better; provide options
-  const filteredResults = filterResults(baseResults, request);
   return {
-    data: { motions: filteredResults.data },
+    data: { motions: results.data },
     page: {
       size: request.page.size,
       index: request.page.index,
-      total: filteredResults.totalResultCount,
-      pageCount: Math.ceil(
-        filteredResults.totalResultCount / request.page.size,
-      ),
+      total: results.totalResultCount,
+      pageCount: Math.ceil(results.totalResultCount / request.page.size),
     },
   };
 }
@@ -51,8 +47,10 @@ async function getSampleMotions(
   const sortedQuery = sortQuery(
     mathsocFirestore.collection("motions"),
     request,
+    true,
   );
-  const paginatedQuery = paginateQuery(sortedQuery, request);
+  const fullQuery = filterQuery(sortedQuery, request);
+  const paginatedQuery = paginateQuery(fullQuery, request);
 
   const results = await paginatedQuery
     .get()
@@ -62,7 +60,7 @@ async function getSampleMotions(
 
   return {
     data: results.slice(0, results.length - 1),
-    totalResultCount: (await sortedQuery.count().get()).data().count,
+    totalResultCount: (await fullQuery.count().get()).data().count,
   };
 }
 
@@ -79,6 +77,7 @@ async function searchMotions(
 
   let query = sortQuery(mathsocFirestore.collection("motions"), request);
   query = query.where("id", "in", idsToRetrieve);
+  query = filterQuery(query, request);
 
   const motions = await query
     .get()
@@ -89,65 +88,6 @@ async function searchMotions(
   return {
     data: motions,
     totalResultCount: searchResults.length,
-  };
-}
-
-function sortQuery(
-  query: FirebaseFirestore.CollectionReference,
-  request: PaginatedMotionsRequest,
-): FirebaseFirestore.Query {
-  switch (request.sort) {
-    case "newest": {
-      return query.orderBy("date", "desc");
-    }
-    case "oldest": {
-      return query.orderBy("date", "asc");
-    }
-    default:
-    case "most-relevant": {
-      return query;
-    }
-  }
-}
-
-function paginateQuery(
-  query: FirebaseFirestore.Query,
-  request: PaginatedMotionsRequest,
-): FirebaseFirestore.Query {
-  query = query.limit(request.page.size);
-  if (request.page.index) {
-    query = query.offset(request.page.index * request.page.size);
-  }
-
-  return query;
-}
-
-type FilterFunction = (
-  motion: Motion,
-  filters: PaginatedMotionsRequest,
-) => boolean;
-function filterResults(
-  results: PageResult<Motion>,
-  request: PaginatedMotionsRequest,
-): PageResult<Motion> {
-  const filterFunctions: FilterFunction[] = [
-    request.filters.requiredFeatures ? filterByFeatures : null,
-    request.filters.from ? filterByFromDate : null,
-    request.filters.to ? filterByToDate : null,
-  ].filter((fn) => fn) as FilterFunction[];
-
-  return {
-    data: results.data.filter((result) => {
-      for (const filter of filterFunctions) {
-        if (!filter(result, request)) {
-          return false;
-        }
-      }
-
-      return true;
-    }),
-    // @todo make this in any way accurate
-    totalResultCount: results.totalResultCount,
   };
 }
 
@@ -168,37 +108,87 @@ async function loadIndex(): Promise<lunr.Index> {
   return lunr.Index.load(serializedIndex);
 }
 
-function filterByFromDate(
-  motion: Motion,
+function sortQuery(
+  query: FirebaseFirestore.CollectionReference,
   request: PaginatedMotionsRequest,
-): boolean {
-  return request.filters.from! <= new Date(motion.date);
-}
-
-function filterByToDate(
-  motion: Motion,
-  request: PaginatedMotionsRequest,
-): boolean {
-  return new Date(motion.date) <= request.filters.to!;
-}
-
-function filterByFeatures(motion: Motion, request: PaginatedMotionsRequest) {
-  const requiredSet = new Set(request.filters.requiredFeatures);
-  for (const requiredFeature of requiredSet) {
-    const motionFeature = motion.features.find(
-      (feature) => feature.type == requiredFeature.type,
-    );
-
-    if (!motionFeature) {
-      return false;
+  defaultNewest?: boolean,
+): FirebaseFirestore.Query {
+  switch (request.sort) {
+    case "newest": {
+      return query.orderBy("date", "desc");
     }
-
-    for (const requiredFeatureValue of requiredFeature.values) {
-      if (!motionFeature.values.includes(requiredFeatureValue)) {
-        return false;
+    case "oldest": {
+      return query.orderBy("date", "asc");
+    }
+    case "most-relevant": {
+      return query;
+    }
+    default:
+      if (defaultNewest) {
+        return query.orderBy("date", "desc");
       }
-    }
+
+      return query;
+  }
+}
+
+function paginateQuery(
+  query: FirebaseFirestore.Query,
+  request: PaginatedMotionsRequest,
+): FirebaseFirestore.Query {
+  query = query.limit(request.page.size);
+  if (request.page.index) {
+    query = query.offset(request.page.index * request.page.size);
   }
 
-  return true;
+  return query;
+}
+
+function filterQuery(
+  query: FirebaseFirestore.Query,
+  request: PaginatedMotionsRequest,
+): FirebaseFirestore.Query {
+  if (!request.filters) {
+    return query;
+  }
+
+  if (request.filters.from) {
+    console.log("filtering by from");
+    query = query.where("date", ">=", request.filters.from);
+  }
+
+  if (request.filters.to) {
+    console.log("filtering by to");
+    query = query.where("date", "<=", request.filters.to);
+  }
+
+  if (request.filters.requiredFeatures?.body?.length) {
+    console.log("filtering by body");
+    query = query.where(
+      "features.body",
+      "==",
+      request.filters.requiredFeatures.body,
+    );
+  }
+
+  console.log(request.filters.requiredFeatures);
+
+  if (request.filters.requiredFeatures?.organizations?.length) {
+    query = query.where(
+      "features.organizations",
+      "array-contains-any",
+      request.filters.requiredFeatures?.organizations,
+    );
+  }
+
+  if (request.filters.requiredFeatures?.monetaryRelation?.length) {
+    console.log("filtering by money");
+    query = query.where(
+      "features.monetaryRelation",
+      "==",
+      request.filters.requiredFeatures.monetaryRelation,
+    );
+  }
+
+  return query;
 }
