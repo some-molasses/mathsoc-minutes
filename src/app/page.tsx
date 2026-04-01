@@ -13,7 +13,7 @@ export default function Home({
         <div id="home-title">
           <h1>MathSoc Archive</h1>
           <p id="page-description">
-            This archive contains approximately 80% of all MathSoc Council and
+            This archive contains approximately 60% of all MathSoc Council and
             Board meeting minutes since 2022.
           </p>
         </div>
