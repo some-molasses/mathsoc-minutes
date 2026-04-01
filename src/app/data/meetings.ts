@@ -1,7 +1,29 @@
 import { MeetingCategory, MeetingData } from "./types";
 
+// Retrieved from https://mathsoc.uwaterloo.ca/api/meetings
 export const meetings: Record<MeetingCategory, MeetingData[]> = {
   boardMeetings: [
+    {
+      date: "February 9 2026",
+      agenda:
+        "https://docs.google.com/document/d/1CsazsQDJKPQC6hg2y-cmrKaegDvKvYOIrNwB2HRIzL8/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1ayi4WRgWUJ05NqUpMwMiH0TuMF_6i8mM9H2JzyEbttg/edit?usp=sharing",
+    },
+    {
+      date: "January 27 2026",
+      agenda:
+        "https://docs.google.com/document/d/1Z_yr1Hwgw8lTg8EfXPa9qCc-oXYJYOqsBldXYo2NVKE/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1SFct0DFmDx5jA_WnRFZIMrPQBGPZJ88GSwUB8_10vdk/edit?usp=sharing",
+    },
+    {
+      date: "January 13 2026",
+      agenda:
+        "https://docs.google.com/document/d/12oAufYrwIXIDyK3DFNBx1Mmqvj80STGDowHcIdvwakU/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1PZc3AzycQxYju8Rjr3VVyPMNJc28J_WrAID0E2YYs_w/edit?usp=sharing",
+    },
     {
       date: "December 23 2025",
       agenda:
@@ -688,6 +710,34 @@ export const meetings: Record<MeetingCategory, MeetingData[]> = {
     },
   ],
   councilMeetings: [
+    {
+      date: "February 24 2026",
+      agenda:
+        "https://docs.google.com/document/d/1aVwxkqqwH5syFpqGQXQAtIadJ84Izzv_-_vQXaGZ91c/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/17zm7jF8xUMZ7c8sxE5jG45luuGaJQNWSAhPObIgA7Ww/edit?usp=sharing",
+    },
+    {
+      date: "February 3 2026",
+      agenda:
+        "https://docs.google.com/document/d/1N2WGXdarPcQBeTRSKZxHOncbHQfL4yNDqXqmEc4LvJo/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1FCT1jxf2tdc6CIskjYtrqUvYTAR-7dR49v4HpX2tPNI/edit?usp=sharing",
+    },
+    {
+      date: "January 26 2026",
+      agenda:
+        "https://docs.google.com/document/d/1v3kP3pMPeP8r86VqElb7sXkvHslkaiWbs9wiLo0E8Zg/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1r2jkNxgUASG2K3dPf2Dn7H_fLS4fd6o2IqipbBdz1Ag/edit?usp=sharing",
+    },
+    {
+      date: "January 12 2026",
+      agenda:
+        "https://docs.google.com/document/d/1wwmNsomxzLY7zSsh3I3Q0Z8whfyFEQQ5aKkv6DkcQfw/edit?usp=sharing",
+      minutes:
+        "https://docs.google.com/document/d/1_jxdx9APKYfsw3JbyuDKUoyLKKxcgEL7a2vGlsiJVEs/edit?usp=sharing",
+    },
     {
       date: "November 27 2025",
       agenda:
@@ -1921,6 +1971,11 @@ export const meetings: Record<MeetingCategory, MeetingData[]> = {
     },
   ],
   generalMeetings: [
+    {
+      date: "March 25 2026",
+      agenda:
+        "https://docs.google.com/document/d/1Utlw4SoXag2H8RHy3SZZY_8e4mkIxNLnIm1c8zWht2U/edit?usp=sharing",
+    },
     {
       date: "November 13 2025",
       agenda:
