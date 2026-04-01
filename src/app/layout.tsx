@@ -26,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/mathsoc-icon.svg" sizes="any" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClientLayout>{children}</ClientLayout>
       </body>
